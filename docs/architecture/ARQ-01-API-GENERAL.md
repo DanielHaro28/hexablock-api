@@ -3,7 +3,7 @@
 | Campo | Valor |
 |---|---|
 | Estado | Borrador para revisión del equipo (Paso 2) |
-| Fecha | 2026-11-11 |
+| Fecha | 2026-11-11 (revisión de coherencia: 12-11) |
 | Repositorio | `hexablock-api` (`docs/architecture/ARQ-01-API-GENERAL.md`) |
 | Relacionados | `ARQ-00-SISTEMA.md` (compartido), `ADR-001-tech-stack.md` §2.2–2.4, `03-REQUISITOS.md` (API), `SECURITY-BASELINE.md` §3–4 |
 
@@ -54,8 +54,8 @@ NestJS conecta los puertos con sus implementaciones por inyección de dependenci
 |---|---|---|
 | `auth` | Registro, inicio de sesión, emisión y verificación del JWT, guard de autenticación, guard de roles | RF-70, RF-71 |
 | `users` | Usuario, nombre visible y rol | RF-70 |
-| `progress` | Recibir el snapshot de una variante, consolidar, guardar el progreso y los mejores intentos; entregar el progreso de las 4 variantes; plausibilidad | RF-72, RF-93 |
-| `leaderboard` | Ranking por `gameId` y por nivel, paginado, con la posición propia | RF-74 |
+| `progress` | Recibir el snapshot de una variante y figura, consolidar, guardar el progreso y los mejores intentos; entregar el progreso de las 4 variantes; plausibilidad | RF-72, RF-93 |
+| `leaderboard` | Ranking por `gameId`, figura (propuesta D-27) y por nivel, paginado, con la posición propia | RF-74 |
 | `levels` | Listar niveles publicados; crear y actualizar (admin); validación estructural | RF-80, RF-81, RF-82 |
 | `health` | `GET /health` (API + base de datos) | RF-92 |
 | `common` | Filtro global de errores, pipe de validación, interceptor de logging con redacción, throttler, configuración validada | RF-91, SEC-API-04, 08, SEC-WEB-06 |
@@ -125,7 +125,7 @@ sequenceDiagram
     TH->>G: dentro del límite
     G->>VP: usuario autenticado (sub del JWT)
     VP->>CT: DTO válido (whitelist)
-    CT->>UC: ejecutar(userId del JWT, gameId, snapshot)
+    CT->>UC: ejecutar(userId del JWT, gameId, figura, snapshot)
     UC->>R: leer progreso guardado
     UC->>DM: consolidar (RN-COM-83) y verificar plausibilidad
     UC->>R: guardar en una transacción
@@ -193,7 +193,7 @@ erDiagram
 
 | Decisión | Motivo |
 |---|---|
-| `PROGRESS` guarda el snapshot de cada variante y figura como **JSON** (`userId` + `gameId` + `topology` como clave; D-25, propuesta D-27) | Cada variante tiene una forma distinta de progreso; el servidor no necesita consultarlo por dentro |
+| `PROGRESS` guarda el snapshot de cada variante y figura como **JSON** (`userId` + `gameId` + `topology` como clave; D-25, propuesta D-27) | Cada variante tiene una forma distinta de progreso; el servidor no necesita consultarlo por dentro. **Ojo con el enunciado §5.2** ("una entrada de progreso por usuario y por variante"): la otra opción de D-27 es una fila por `userId` + `gameId` con una sección por figura dentro del JSON (ver `PENDIENTES.md`) |
 | `BEST_ATTEMPT` en una tabla con columnas (no JSON) | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es nulo y cuenta solo el puntaje |
 | `LEVEL.data` como JSON + columnas comunes | Esquema común + sección específica por `gameId` (RN-COM-70) |
 
@@ -225,7 +225,7 @@ erDiagram
 |---|---|---|
 | ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | 🟡 D-22 |
 | ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | 🟡 D-22 |
-| ARQ-B-03 | El progreso se guarda como JSON por `gameId`; los mejores intentos en una tabla con columnas para el ranking | 🟡 D-22 |
+| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-22, D-27 |
 | ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 |
 | ARQ-B-05 | Los ejemplos compartidos se guardan como JSON en `test/fixtures/` y son los mismos que usa la app | 🟡 D-23 |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |
