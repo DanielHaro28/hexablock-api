@@ -1,0 +1,58 @@
+# DECISIONES — hexablock-api
+
+> Registro de **todas las decisiones cerradas** que afectan a `hexablock-api`: las del equipo (`D-*`) y las respuestas del profesor o del enunciado (`P-*`).
+>
+> - Las decisiones **abiertas** están en `hexablock-app/docs/PENDIENTES.md` §1.1. Al cerrarse, pasan aquí con su fecha y se borran de allí.
+> - Las decisiones que afectan a los dos repos aparecen **con el mismo texto** en el `DECISIONES.md` de `hexablock-app` (columna *Repos*: **Ambos**). Si cambian, se cambian en los dos.
+> - Si un documento citado en *Dónde quedó* no está en este repo, está en `hexablock-app`.
+> - Una decisión cerrada solo se reabre si el equipo lo decide explícitamente. Los IDs nunca se reutilizan.
+>
+> **Última actualización:** 2026-11-17
+
+---
+
+## 1. Decisiones del equipo
+
+### Organización y flujo de trabajo
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-01 | Los repos están en la cuenta de **DanielHaro28**, que los creó y los administra | ADR-001 §2.4 | Ambos | 11-11 |
+| D-24 | La protección de `main` exige PR y CI en verde, pero **no** la aprobación de otra persona; autorrevisión con la plantilla de PR y revisión de un compañero recomendada | ADR-001 §2.4, SECURITY §7, SEC-AGT-05, 07 | Ambos | 11-11 |
+
+### Cuenta, progreso y ranking
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-04 | Ranking por nivel de Hexa Sort: **movimientos ↑ → puntaje ↓** (menos pilas colocadas primero; el puntaje desempata) | RN-COM-103, RN-HS-71 | Ambos | 11-11 |
+| D-05 | Al iniciar sesión con progreso de invitado, la app **pregunta** "¿importar tu progreso?"; si acepta, se consolida | RN-COM-88 | Ambos | 11-11 |
+| D-06 | Al cerrar sesión, el dispositivo **vuelve al perfil invitado** con su propio progreso; el de la cuenta queda guardado localmente | RN-COM-89 | Ambos | 11-11 |
+
+### Reglas de juego
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-10 | Hexa Fit: colocar/mover/retirar cuentan como movimiento; rotar/deshacer/rehacer no. **Estrellas independientes:** ★ completar + ★ movimientos ≤ `m` + ★ tiempo ≤ `t`. Por eso un nivel completado tiene de 1 a 3 estrellas, que es lo que valida el servidor | RN-HF-61 a 64, E-HF-1, RN-COM-108, SEC-API-06 | Ambos | 11-11 |
+| D-12 | Puntaje de Hexa Sort: 1 por ficha transferida + 100 por meta (solo desempata el ranking; ver D-04) | RN-HS-60 | Ambos | 11-11 |
+
+### Topologías (figura de las celdas)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-18 | **Topologías:** solo rejillas regulares. Hexágonos (dominio + app, Must); cuadrados y triángulos (dominio + app 2D, Should); cubos (dominio con pruebas, Should; vista 3D, Could) | RN-COM-18, RN-TOP-01 a 04 | Ambos | 11-11 |
+| D-25 | **El jugador elige la figura de las celdas en Ajustes** (solo las disponibles; hexágonos por defecto). La figura se fija al crear la partida y **no se puede cambiar durante ella**: la opción se bloquea mientras haya una partida en curso o en pausa | RN-COM-19, RN-COM-113, RN-TOP-30, 31; RF-09; NAV-08 | Ambos | 11-11 |
+
+Las decisiones que solo afectan a la app (reglas internas de las variantes y motor genérico: D-07 a D-09, D-11, D-13 a D-17 y D-29 a D-35) están en `hexablock-app/docs/DECISIONES.md`.
+
+## 2. Respuestas del profesor y del enunciado
+
+> **Indicación del profesor (11-11):** lo que el enunciado no especifica **lo decide el equipo**. Por eso no quedan preguntas abiertas: las que el enunciado no resolvía pasaron a decisiones del equipo.
+
+| ID | Pregunta | Respuesta | Fuente | Repos | Fecha |
+|---|---|---|---|---|---|
+| P-01 | ¿Se aceptan repos públicos? | **Sí** | Profesor | Ambos | 11-11 |
+| P-07 | Orden del ranking por nivel de Hexa Fit | **Estrellas (desc) → tiempo (asc) → movimientos (asc)**, comparando el **mismo intento** completo (no la mejor estrella de un intento con el mejor tiempo de otro) | Profesor | Ambos | 11-11 |
+| P-08 | ¿Jugar sin cuenta y sincronizar después? | **Sí**. Modo invitado con progreso local; un usuario registrado sin conexión sigue jugando y sincroniza al reconectar. API-05 pasa de *Should* a **Must** | Profesor | Ambos | 11-11 |
+| P-09 | ¿Basta con endpoints de admin + Swagger para publicar niveles? | **Sí**: §5.2 pide un "endpoint para obtener y actualizar la definición de niveles"; no pide interfaz de administración | Enunciado §5.2 | Ambos | 11-11 |
+| P-10 | ¿Historias técnicas como HU o aparte? | El enunciado no exige HU: **decisión del equipo**. Se mantienen como historias habilitadoras (TEC) en el backlog | Enunciado (no lo regula) | Ambos | 11-11 |
+| P-11 | ¿Mermaid o notación UML de plantilla en el diagrama de clases? | **Notación UML de plantilla** (§4.1) → diagrama de clases en **PlantUML** | Enunciado §4.1 | Ambos | 11-11 |
