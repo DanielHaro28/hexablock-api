@@ -7,6 +7,7 @@
 ```
 docs/
 ├── README.md                              ← este índice
+├── DECISIONES.md                          ← decisiones cerradas que afectan al backend (las compartidas, con el mismo texto que en hexablock-app)
 ├── adr/
 │   └── ADR-001-tech-stack.md              [compartido]
 ├── architecture/
@@ -27,7 +28,8 @@ Se irán agregando con los siguientes pasos: más documentos en `architecture/` 
 
 **Lo que no está aquí:**
 - Las **reglas de juego** (variantes y topologías) viven solo en `hexablock-app`, porque el backend no ejecuta partidas. El backend solo necesita las reglas de **niveles** y de **cuenta, progreso y ranking**, que están compartidas.
-- La lista de **pendientes del proyecto** vive solo en `hexablock-app/docs/PENDIENTES.md`.
+- La lista de **pendientes del proyecto** (con las decisiones abiertas) vive solo en `hexablock-app/docs/PENDIENTES.md`.
+- Las decisiones que solo afectan a la app (reglas internas de las variantes y motor genérico) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## Documentos compartidos con `hexablock-app`
 
