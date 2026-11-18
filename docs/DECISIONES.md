@@ -48,8 +48,9 @@
 | ID | Decisión | Dónde quedó | Repos | Fecha |
 |---|---|---|---|---|
 | D-22 | **Estructura del backend:** módulos por área (`auth`, `users`, `progress`, `leaderboard`, `levels`, `health`) con `domain/` (capa 1), `application/` (capa 2: casos de uso y puertos), `presentation/` e `infrastructure/` (capa 3: controladores y DTOs; adaptadores que implementan los puertos, como repositorios Prisma, argon2 y JWT). `main.ts`, `src/prisma/` y la configuración de NestJS son capa 4. **Un caso de uso por clase.** Cómo se guarda el progreso (JSON) queda para D-27 | ARQ-01-API §2 a §4, ARQ-B-01, 02 | API | 17-11 |
+| D-23 | **Contrato entre app y API:** `openapi.yaml` y los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) viven en `hexablock-api/docs/contracts/`, la fuente única. La API valida sus respuestas contra ese archivo; la app guarda una **copia** para probar sus mappers y su CI **falla si la copia difiere** de la del repo de la API (es la herramienta "equivalente a Pact" del enunciado §3.6) | ARQ-00 §6 (ARQ-S-05), ARQ-01-API §9 (ARQ-B-05) | Ambos | 17-11 |
 
-Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21 y D-29 a D-35) están en `hexablock-app/docs/DECISIONES.md`.
+Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35 y D-37) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## 2. Respuestas del profesor y del enunciado
 

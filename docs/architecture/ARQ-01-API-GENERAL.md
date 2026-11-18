@@ -99,7 +99,7 @@ hexablock-api/
 ├── test/
 │   ├── unit/                       # dominio y casos de uso, sin base de datos
 │   ├── e2e/                        # endpoints con Supertest contra Postgres
-│   └── fixtures/                   # ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL)
+│   └── fixtures/                   # datos de prueba propios del backend
 ├── deploy/
 │   ├── docker-compose.yml          # api + postgres + caddy (producción)
 │   └── Caddyfile
@@ -218,7 +218,7 @@ erDiagram
 | `application/` no importa `infrastructure/` | Misma regla para `src/modules/*/application/**` | RNF-12 |
 | Sin SQL inseguro | Búsqueda de `$queryRawUnsafe` | SEC-WEB-05 |
 | Respuestas según el contrato | Pruebas de contrato contra `openapi.yaml` | RNF-25 |
-| Consolidación idéntica a la de la app | Pruebas con los ejemplos compartidos de `test/fixtures/` | ARQ-S-03 |
+| Consolidación idéntica a la de la app | Pruebas con los ejemplos compartidos de `docs/contracts/` | ARQ-S-03, D-23 |
 | Dependencias seguras | `npm audit --audit-level=high` | SEC-WEB-02 |
 
 ## 9. Decisiones de este documento
@@ -229,5 +229,5 @@ erDiagram
 | ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
 | ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-27 (fuera de D-22) |
 | ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 Se revisa en el Paso 4 contra el enunciado §3.5, que pide AOP con decoradores o proxies sobre los casos de uso |
-| ARQ-B-05 | Los ejemplos compartidos se guardan como JSON en `test/fixtures/` y son los mismos que usa la app | 🟡 D-23 |
+| ARQ-B-05 | Los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) y `openapi.yaml` viven en `docs/contracts/`, la fuente única; las pruebas del backend los leen de ahí y la app usa una copia verificada por su CI | ✅ D-23 (17-11) |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |
