@@ -44,9 +44,11 @@ flowchart LR
 | `domain/` | 1 · Entidades | Entidades y reglas puras: consolidación, criterios de mejor intento y de orden del ranking, validación estructural de niveles, plausibilidad | **Nada** de NestJS, Prisma ni otros módulos de infraestructura |
 | `application/` | 2 · Casos de uso | Casos de uso (un servicio por caso) y **puertos** (interfaces de repositorio, hasher, emisor de tokens) | `domain/` |
 | `presentation/` | 3 · Adaptadores (entrada) | Controladores, DTOs con `class-validator`, decoradores de Swagger, mappers DTO ↔ dominio | `application/`, `domain/`, NestJS |
-| `infrastructure/` | 3 y 4 · Adaptadores (salida) y frameworks | Repositorios Prisma, hasher argon2, emisor JWT | Todo lo anterior, Prisma, librerías |
+| `infrastructure/` | 3 · Adaptadores (salida) | Clases que **implementan los puertos**: repositorios Prisma, hasher argon2, emisor JWT | Todo lo anterior, Prisma, librerías |
 
 NestJS conecta los puertos con sus implementaciones por inyección de dependencias en el `*.module.ts` de cada módulo (el *composition root* del módulo).
+
+**Capa 4 (frameworks):** `src/main.ts`, `src/prisma/` (`PrismaService`), los `*.module.ts` y la configuración de NestJS, PostgreSQL y Docker. Así cada carpeta corresponde a una sola capa del enunciado §3.4 (D-22).
 
 ## 3. Módulos
 
@@ -223,9 +225,9 @@ erDiagram
 
 | ID | Decisión | Estado |
 |---|---|---|
-| ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | 🟡 D-22 |
-| ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | 🟡 D-22 |
-| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-22, D-27 |
-| ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 |
+| ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | ✅ D-22 (17-11) |
+| ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
+| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-27 (fuera de D-22) |
+| ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 Se revisa en el Paso 4 contra el enunciado §3.5, que pide AOP con decoradores o proxies sobre los casos de uso |
 | ARQ-B-05 | Los ejemplos compartidos se guardan como JSON en `test/fixtures/` y son los mismos que usa la app | 🟡 D-23 |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |
