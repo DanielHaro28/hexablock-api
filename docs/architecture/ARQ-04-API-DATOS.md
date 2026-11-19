@@ -142,7 +142,7 @@ Para el tamaño del proyecto basta el índice `(game_id, topology, level_id)`. C
 
 - **Cursor (D-48, RN-COM-77):** es el último `change_seq` entregado, codificado en base64url. La consulta es `WHERE game_id = $1 AND topology IN ($2, 'any') AND change_seq > $cursor ORDER BY change_seq LIMIT $limit`. `'any'` solo cuenta para Hexa Sort. Sin cursor se empieza desde 0. La respuesta siempre trae `nextCursor`: el último `change_seq` de la página, o el mismo cursor si no hubo cambios.
 - **Por qué una secuencia y no la fecha:** dos cambios en el mismo milisegundo tendrían la misma fecha; la secuencia nunca se repite. Un riesgo conocido de los cursores es que una transacción que tomó un número menor confirme después de que alguien ya leyó uno mayor. Aquí es despreciable, porque solo el administrador publica y lo hace de a uno.
-- **Publicar:** el nivel pasa por el esquema y por las reglas estructurales (D-19 pendiente; RN-COM-76).
+- **Publicar:** el nivel pasa por el esquema y por las reglas estructurales (D-19, RN-COM-76); la geométrica la revisa antes el validador de la app.
   - `POST` con un `id` existente → `409 level-exists`.
   - `PUT` con una `version` que no es mayor → `409 stale-version`.
   - El `id` del cuerpo distinto del de la ruta → `400 validation-failed`.
