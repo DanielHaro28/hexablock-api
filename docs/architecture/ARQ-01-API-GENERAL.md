@@ -60,7 +60,7 @@ NestJS conecta los puertos con sus implementaciones por inyección de dependenci
 | `leaderboard` | Ranking por `gameId`, figura (propuesta D-27) y por nivel, paginado, con la posición propia | RF-74 |
 | `levels` | Listar niveles publicados; crear y actualizar (admin); validación estructural | RF-80, RF-81, RF-82 |
 | `health` | `GET /health` (API + base de datos) | RF-92 |
-| `common` | Filtro global de errores, pipe de validación, interceptor de logging con redacción, throttler, configuración validada | RF-91, SEC-API-04, 08, SEC-WEB-06 |
+| `common` | Filtro global de errores, pipe de validación, interceptor de accesos HTTP, throttler, configuración validada; aspectos AOP sobre los casos de uso en `common/application/aspects/` (D-42) | RF-91, SEC-API-04, 08, SEC-WEB-06 |
 | `prisma` | `PrismaService` (conexión) | — |
 
 **Dependencias entre módulos:** `progress` y `leaderboard` comparten los **mejores intentos** (`leaderboard` solo los lee). `levels` es independiente. Ningún módulo importa el `infrastructure/` de otro.
@@ -137,11 +137,11 @@ sequenceDiagram
 
 Si algo falla en cualquier punto, el **filtro global de errores** responde con `{ code, message, details }` y el código correcto (400, 401, 403, 404, 409, 429 o 500), sin stack trace (RF-91).
 
-**Transversales con mecanismos de NestJS** (AOP del lado del servidor):
+**Transversales con mecanismos de NestJS** (tubería HTTP). El AOP sobre los casos de uso se hace con clases decoradoras (D-42, `ARQ-03-API-DETALLE.md` §4):
 
 | Necesidad | Mecanismo | Control |
 |---|---|---|
-| Logging de peticiones con redacción de `password` y `token` | Interceptor global | SEC-WEB-06 |
+| Registro de accesos HTTP (estado, duración, *correlation id*); el registro de cada caso de uso, con redacción, lo hace `LoggingAspect` | Interceptor de acceso global | SEC-WEB-06 |
 | Errores uniformes | Filtro de excepciones global | SEC-API-08, SEC-WEB-07 |
 | Autenticación y roles | Guards (denegación por defecto) | SEC-API-02, 05 |
 | Validación de entrada | `ValidationPipe` global | SEC-API-03 |
@@ -228,6 +228,6 @@ erDiagram
 | ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | ✅ D-22 (17-11) |
 | ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
 | ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-27 (fuera de D-22) |
-| ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 Se revisa en el Paso 4 contra el enunciado §3.5, que pide AOP con decoradores o proxies sobre los casos de uso |
+| ARQ-B-04 | El AOP sobre los casos de uso se hace con **clases decoradoras** (registro, métricas, caché del ranking); los mecanismos de NestJS (guards, filtros, pipes, throttler, interceptor de acceso) quedan para la tubería HTTP | ✅ D-42 (19-11) |
 | ARQ-B-05 | Los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) y `openapi.yaml` viven en `docs/contracts/`, la fuente única; las pruebas del backend los leen de ahí y la app usa una copia verificada por su CI | ✅ D-23 (17-11) |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |

@@ -8,7 +8,7 @@
 > - Si un documento citado en *Dónde quedó* no está en este repo, está en `hexablock-app`.
 > - Una decisión cerrada solo se reabre si el equipo lo decide explícitamente. Los IDs nunca se reutilizan.
 >
-> **Última actualización:** 2026-11-17
+> **Última actualización:** 2026-11-19
 
 ---
 
@@ -49,6 +49,15 @@
 |---|---|---|---|---|
 | D-22 | **Estructura del backend:** módulos por área (`auth`, `users`, `progress`, `leaderboard`, `levels`, `health`) con `domain/` (capa 1), `application/` (capa 2: casos de uso y puertos), `presentation/` e `infrastructure/` (capa 3: controladores y DTOs; adaptadores que implementan los puertos, como repositorios Prisma, argon2 y JWT). `main.ts`, `src/prisma/` y la configuración de NestJS son capa 4. **Un caso de uso por clase.** Cómo se guarda el progreso (JSON) queda para D-27 | ARQ-01-API §2 a §4, ARQ-B-01, 02 | API | 17-11 |
 | D-23 | **Contrato entre app y API:** `openapi.yaml` y los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) viven en `hexablock-api/docs/contracts/`, la fuente única. La API valida sus respuestas contra ese archivo; la app guarda una **copia** para probar sus mappers y su CI **falla si la copia difiere** de la del repo de la API (es la herramienta "equivalente a Pact" del enunciado §3.6) | ARQ-00 §6 (ARQ-S-05), ARQ-01-API §9 (ARQ-B-05) | Ambos | 17-11 |
+
+### Arquitectura detallada (Paso 4)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-38 | **Forma de los casos de uso:** una interfaz única `UseCase<TIn, TOut>` con un solo método `execute` (en Dart `Future<TOut> execute(TIn input)`; en TypeScript `execute(input: I): Promise<O>`). La entrada es un solo objeto o *record*. Así un mismo aspecto envuelve cualquier caso de uso (enunciado §3.5) | ARQ-03-APP §1, ARQ-03-API §1 | Ambos | 19-11 |
+| D-39 | **Errores:** por dentro, **excepciones tipadas** (los adaptadores traducen los errores técnicos a excepciones de la aplicación y el caso de uso no las maneja); hacia afuera, una salida uniforme: en la app, un **`Result` *sealed*** (éxito o fallo tipado) que entrega el aspecto de errores a la pantalla; en el backend, el **filtro global de errores** de NestJS convierte cada error tipado en `{ code, message, details }` (RF-91). Sin librerías externas (D-21). Las excepciones no tipadas son errores de programación | ARQ-03-APP §2, ARQ-03-API §2 | Ambos | 19-11 |
+| D-42 | **AOP en el backend:** clases decoradoras sobre `UseCase<I, O>` (registro con redacción, métricas y caché del ranking), igual que en la app. Lo propio de HTTP queda en los mecanismos de NestJS: guards (JWT y roles), filtro global de errores, `ValidationPipe`, throttler y el registro de accesos HTTP de SEC-WEB-06 | ARQ-03-API §4; ARQ-01-API §5 (ARQ-B-04) | API | 19-11 |
+| D-43 | **Diagramas:** el de clases en **PlantUML** (notación UML de plantilla, §4.1; se mantiene P-11), un archivo por repo; las imágenes las genera DanielHaro28 con la extensión de PlantUML de VS Code, sin robot de CI. Capas y extensibilidad en **Mermaid**, con imágenes generadas y comprobadas al escribirlos. Todo en `docs/diagrams/` | docs/diagrams/, ADR-001 §2.5 | Ambos | 19-11 |
 
 Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35 y D-37) están en `hexablock-app/docs/DECISIONES.md`.
 

@@ -1,0 +1,231 @@
+@startuml clases
+' Diagrama de clases de hexablock-api (enunciado §4.1, D-43).
+' Fuente editable. La imagen (clases.png) se genera con la extensión de PlantUML de VS Code:
+' abrir este archivo → Ctrl+Shift+P → "PlantUML: Export Current Diagram" → png.
+' Colores por capa de la Clean Architecture; estereotipos «...» = patrón de diseño.
+' Los nombres son los previstos en ARQ-03-API; se revisan contra el código real.
+
+set namespaceSeparator none
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #444444
+skinparam ClassBorderColor #555555
+hide empty members
+
+package "Capa 1 · Entidades (domain/)" #FFF4E0 {
+  class User {
+    + id: string
+    + displayName: string
+    + role: Role
+  }
+  enum Role {
+    PLAYER
+    ADMIN
+  }
+  class VariantProgress {
+    + gameId: string
+    + topology: string
+  }
+  class BestAttempt {
+    + levelId: string?
+    + score: number
+    + stars: number
+    + timeMs: number
+    + moves: number
+  }
+  class ProgressConsolidator {
+    + consolidate(saved: VariantProgress, incoming: VariantProgress): VariantProgress
+  }
+  interface IPlausibilityPolicy <<Strategy>> {
+    + check(attempt: BestAttempt): void
+  }
+  class PlausibilityPolicies <<Factory Method>> {
+    + for(gameId: string): IPlausibilityPolicy
+  }
+  interface IRankingPolicy <<Strategy>> {
+    + compare(a: BestAttempt, b: BestAttempt): number
+  }
+  class EndlessRanking
+  class FitLevelRanking
+  class SortLevelRanking
+  class LevelsGlobalRanking
+  class RankingPolicies <<Factory Method>> {
+    + for(gameId: string, levelId?: string): IRankingPolicy
+  }
+  class LevelDefinition {
+    + id: string
+    + gameId: string
+    + topology: string
+    + version: number
+  }
+  abstract class LevelValidator <<Template Method>> {
+    + validate(level: LevelDefinition): void
+    # validateSection(level: LevelDefinition): void
+  }
+  class FitLevelValidator
+  class SortLevelValidator
+  abstract class DomainError
+  class ValidationError
+  class ImplausibleResultError
+  class UnauthorizedError
+  class ForbiddenError
+  class NotFoundError
+  class ConflictError
+}
+
+package "Capa 2 · Casos de uso (application/)" #EAF6EC {
+  interface UseCase<I, O> {
+    + execute(input: I): Promise<O>
+  }
+  class RegisterUserUseCase
+  class LoginUseCase
+  class GetProgressUseCase
+  class SyncProgressUseCase
+  class GetLeaderboardUseCase
+  class ListLevelsUseCase
+  class UpsertLevelUseCase
+  class CheckHealthUseCase
+  class LoggingAspect<I, O> <<Decorator>> <<AOP>>
+  class MetricsAspect<I, O> <<Decorator>> <<AOP>>
+  class CacheAspect<I, O> <<Proxy>> <<AOP>>
+  interface IUserRepository
+  interface IProgressRepository
+  interface IBestAttemptRepository
+  interface IBestAttemptReader
+  interface ILevelRepository
+  interface ILevelCatalog
+  interface ITransactionRunner
+  interface IPasswordHasher
+  interface ITokenIssuer
+  interface IHealthProbe
+  interface ILogger
+  interface IMetrics
+  interface IClock
+}
+
+package "Capa 3 · Adaptadores (presentation/ e infrastructure/)" #EAF2FB {
+  class AuthController
+  class ProgressController
+  class LeaderboardController
+  class LevelsController
+  class HealthController
+  class PrismaUserRepository <<Adapter>>
+  class PrismaProgressRepository <<Adapter>>
+  class PrismaBestAttemptRepository <<Adapter>>
+  class PrismaLevelRepository <<Adapter>>
+  class PrismaTransactionRunner <<Adapter>>
+  class Argon2PasswordHasher <<Adapter>>
+  class JwtTokenIssuer <<Adapter>>
+  class PrismaHealthProbe <<Adapter>>
+}
+
+package "Capa 4 · Frameworks (NestJS, Prisma)" #F4F1FA {
+  class PrismaService <<Singleton via DI>>
+  class JwtAuthGuard <<Chain of Responsibility>>
+  class RolesGuard <<Chain of Responsibility>>
+  class GlobalExceptionFilter
+  class AccessLogInterceptor
+  class LeaderboardModule {
+    + useFactory(): UseCase
+  }
+}
+
+' ===== Herencia e implementación =====
+IRankingPolicy <|.. EndlessRanking
+IRankingPolicy <|.. FitLevelRanking
+IRankingPolicy <|.. SortLevelRanking
+IRankingPolicy <|.. LevelsGlobalRanking
+LevelValidator <|-- FitLevelValidator
+LevelValidator <|-- SortLevelValidator
+DomainError <|-- ValidationError
+DomainError <|-- ImplausibleResultError
+DomainError <|-- UnauthorizedError
+DomainError <|-- ForbiddenError
+DomainError <|-- NotFoundError
+DomainError <|-- ConflictError
+UseCase <|.. RegisterUserUseCase
+UseCase <|.. LoginUseCase
+UseCase <|.. GetProgressUseCase
+UseCase <|.. SyncProgressUseCase
+UseCase <|.. GetLeaderboardUseCase
+UseCase <|.. ListLevelsUseCase
+UseCase <|.. UpsertLevelUseCase
+UseCase <|.. CheckHealthUseCase
+UseCase <|.. LoggingAspect
+UseCase <|.. MetricsAspect
+UseCase <|.. CacheAspect
+IBestAttemptReader <|-- IBestAttemptRepository
+IUserRepository <|.. PrismaUserRepository
+IProgressRepository <|.. PrismaProgressRepository
+IBestAttemptRepository <|.. PrismaBestAttemptRepository
+ILevelRepository <|.. PrismaLevelRepository
+ILevelCatalog <|.. PrismaLevelRepository
+ITransactionRunner <|.. PrismaTransactionRunner
+IPasswordHasher <|.. Argon2PasswordHasher
+ITokenIssuer <|.. JwtTokenIssuer
+IHealthProbe <|.. PrismaHealthProbe
+
+' ===== Asociación, agregación y composición =====
+User *-- Role
+User "1" o-- "0..*" VariantProgress
+User "1" o-- "0..*" BestAttempt
+BestAttempt --> LevelDefinition : sobre (opcional)
+PlausibilityPolicies ..> IPlausibilityPolicy : crea
+RankingPolicies ..> IRankingPolicy : crea
+LoggingAspect o-- UseCase : envuelve
+MetricsAspect o-- UseCase : envuelve
+CacheAspect o-- UseCase : cachea
+LoggingAspect --> ILogger
+MetricsAspect --> IMetrics
+CacheAspect --> IClock
+RegisterUserUseCase --> IUserRepository
+RegisterUserUseCase --> IPasswordHasher
+RegisterUserUseCase --> ITokenIssuer
+RegisterUserUseCase ..> ConflictError : lanza
+LoginUseCase --> IUserRepository
+LoginUseCase --> IPasswordHasher
+LoginUseCase --> ITokenIssuer
+GetProgressUseCase --> IProgressRepository
+SyncProgressUseCase --> IProgressRepository
+SyncProgressUseCase --> IBestAttemptRepository
+SyncProgressUseCase --> ILevelCatalog
+SyncProgressUseCase --> ITransactionRunner
+SyncProgressUseCase --> ProgressConsolidator
+SyncProgressUseCase --> PlausibilityPolicies
+GetLeaderboardUseCase --> IBestAttemptReader
+GetLeaderboardUseCase --> RankingPolicies
+ListLevelsUseCase --> ILevelRepository
+UpsertLevelUseCase --> ILevelRepository
+UpsertLevelUseCase --> LevelValidator
+CheckHealthUseCase --> IHealthProbe
+AuthController --> UseCase : RegisterUser, Login
+ProgressController --> UseCase : GetProgress, SyncProgress
+LeaderboardController --> UseCase : GetLeaderboard (envuelto)
+LevelsController --> UseCase : ListLevels, UpsertLevel
+HealthController --> UseCase : CheckHealth
+PrismaUserRepository --> PrismaService
+PrismaProgressRepository --> PrismaService
+PrismaBestAttemptRepository --> PrismaService
+PrismaLevelRepository --> PrismaService
+PrismaHealthProbe --> PrismaService
+GlobalExceptionFilter ..> DomainError : traduce a HTTP
+JwtAuthGuard ..> ITokenIssuer : verifica el JWT
+RolesGuard ..> Role : exige ADMIN
+AccessLogInterceptor --> ILogger
+LeaderboardModule ..> CacheAspect : arma
+LeaderboardModule ..> GetLeaderboardUseCase : arma
+
+legend right
+  |= Color |= Capa |
+  |<#FFF4E0> | 1 · Entidades (domain/) |
+  |<#EAF6EC> | 2 · Casos de uso (application/) |
+  |<#EAF2FB> | 3 · Adaptadores |
+  |<#F4F1FA> | 4 · Frameworks |
+  «...» en una clase = patrón de diseño (ARQ-03-API §5)
+  Cada módulo registra sus casos de uso envueltos como LeaderboardModule
+endlegend
+
+@enduml
