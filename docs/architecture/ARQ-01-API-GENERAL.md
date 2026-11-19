@@ -11,7 +11,7 @@
 
 **Decide:** módulos, capas dentro de cada módulo y sus dependencias, el recorrido de una petición, el modelo de datos a grandes rasgos, el despliegue y los controles de CI.
 
-**No decide** (Paso 5, contratos): rutas y DTOs exactos (`openapi.yaml`), esquema Prisma definitivo, JSON Schema de los niveles.
+**Lo fijó el Paso 5:** rutas y DTOs exactos y JSON Schema en `docs/contracts/`; esquema Prisma en `ARQ-04-API-DATOS.md`.
 
 **Estados:** ✅ ya decidido (ADR-001 o enunciado) · 🟡 propuesta para que el equipo confirme.
 
@@ -135,7 +135,7 @@ sequenceDiagram
     CT-->>APP: 200 + JSON
 ```
 
-Si algo falla en cualquier punto, el **filtro global de errores** responde con `{ code, message, details }` y el código correcto (400, 401, 403, 404, 409, 429 o 500), sin stack trace (RF-91).
+Si algo falla en cualquier punto, el **filtro global de errores** responde con Problem Details (RFC 9457) y el código correcto (400, 401, 403, 404, 409, 413, 429, 500 o 503), sin stack trace ni valores enviados (RF-91, D-51).
 
 **Transversales con mecanismos de NestJS** (tubería HTTP). El AOP sobre los casos de uso se hace con clases decoradoras (D-42, `ARQ-03-API-DETALLE.md` §4):
 
@@ -147,9 +147,9 @@ Si algo falla en cualquier punto, el **filtro global de errores** responde con `
 | Validación de entrada | `ValidationPipe` global | SEC-API-03 |
 | Límite de peticiones | `@nestjs/throttler` | SEC-API-04 |
 
-## 6. Modelo de datos (preliminar)
+## 6. Modelo de datos (resumen)
 
-El esquema definitivo se fija en el Paso 5. Esta es la forma que se propone:
+El modelo completo (esquema Prisma, transacción de sincronización, consultas del ranking y cursor de niveles) está en **`ARQ-04-API-DATOS.md`**. Resumen:
 
 ```mermaid
 erDiagram
@@ -174,7 +174,7 @@ erDiagram
         uuid userId FK
         string gameId
         string topology
-        string levelId FK
+        string levelId "vacío en récords"
         int score
         int stars
         int timeMs
@@ -188,6 +188,7 @@ erDiagram
         int version
         string topology
         json data
+        bigint changeSeq UK
         datetime publishedAt
         datetime updatedAt
     }
@@ -196,8 +197,8 @@ erDiagram
 | Decisión | Motivo |
 |---|---|
 | `PROGRESS`: **una fila por `userId` + `gameId`** (clave), con una **sección por figura** dentro del JSON `sections` (D-27). Cada sección tiene una de dos formas: récord o niveles (D-45) | Cumple al pie de la letra el enunciado §5.2 ("una entrada de progreso por usuario y por variante"). El servidor no necesita consultar el JSON por dentro: el ranking sale de `BEST_ATTEMPT` |
-| `BEST_ATTEMPT` en una tabla con columnas (no JSON), con la columna `topology` | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es nulo y cuenta solo el puntaje |
-| `LEVEL.updatedAt` con un índice (`gameId`, `topology`, `updatedAt`, `id`) | La descarga por cambios ordena y pagina por esa clave; el cursor la codifica (D-48, RN-COM-77) |
+| `BEST_ATTEMPT` en una tabla con columnas (no JSON), con la columna `topology` | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es vacío (`''`), para que la clave única funcione, y cuenta solo el puntaje |
+| `LEVEL.changeSeq` de una secuencia, con índice (`gameId`, `topology`, `changeSeq`) | La descarga por cambios ordena y pagina por ese número, que nunca se repite (dos fechas sí pueden coincidir); el cursor lo codifica (D-48, RN-COM-77) |
 | `LEVEL.data` como JSON + columnas comunes | Esquema común + sección específica por `gameId` (RN-COM-70) |
 
 ## 7. Despliegue

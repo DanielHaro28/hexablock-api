@@ -53,7 +53,7 @@
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
 | RF-90 | Documenta todos los endpoints con Swagger / OpenAPI, público en `/docs` | — | §5.2 (5) | Must |
-| RF-91 | Responde los errores con un formato único `{ code, message, details }`, códigos HTTP correctos y sin stack trace | SEC-API-08, SEC-WEB-07 | §5.2 (6) | Must |
+| RF-91 | Responde los errores con Problem Details (RFC 9457, `application/problem+json`) más `code` y `errors`, con el código HTTP correcto, `WWW-Authenticate` en los 401 y `Retry-After` en los 429, sin stack trace ni valores enviados | SEC-API-08, SEC-WEB-07, D-51 | §5.2 (6) | Must |
 | RF-92 | Expone `GET /health`, que responde 200 cuando la API y la base de datos están disponibles | — | ADR-001 | Must |
 
 ---

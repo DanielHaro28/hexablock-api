@@ -32,7 +32,7 @@
 Como jugador, quiero crear una cuenta, para guardar mi progreso en el servidor.
 - Dado un correo no registrado y datos válidos, cuando me registro, entonces se crea la cuenta y recibo un JWT.
 - Dado un correo ya registrado, entonces recibo **409** con un mensaje claro _(decisión D-03)_.
-- Dado un nombre visible que ya usa otra cuenta (sin distinguir mayúsculas), entonces recibo **409** con el código `DISPLAY_NAME_TAKEN` (RN-COM-109).
+- Dado un nombre visible que ya usa otra cuenta (sin distinguir mayúsculas), entonces recibo **409** con el código `display-name-taken` (RN-COM-109).
 - Dados datos inválidos o campos no permitidos (como `role`), entonces recibo **400** con el detalle por campo (SEC-API-03).
 - La contraseña se guarda con argon2id, nunca en texto plano.
 - Más de 5 intentos por minuto desde la misma IP → **429** (SEC-API-04).
@@ -104,7 +104,7 @@ Como equipo de desarrollo, quiero que GitHub Actions ejecute las pruebas en cada
 ### TEC-05 · API documentada y con errores consistentes
 Como equipo de desarrollo, quiero documentar la API con OpenAPI y estandarizar los errores, para que cliente y backend compartan un contrato claro.
 - Swagger cubre todos los endpoints, se genera desde `openapi.yaml` y está público en `/docs`.
-- Todos los errores tienen el formato `{ code, message, details }` y nunca exponen el stack (SEC-API-08).
+- Todos los errores siguen Problem Details (RFC 9457) con `code` y `errors`, y nunca exponen el stack ni los valores enviados (SEC-API-08, D-51).
 - Existe `GET /health`, que responde 200 cuando la API y la base de datos están disponibles.
 
 **Must** · RF-90, RF-91, RF-92, RNF-25, RNF-32
