@@ -32,11 +32,12 @@
 Como jugador, quiero crear una cuenta, para guardar mi progreso en el servidor.
 - Dado un correo no registrado y datos válidos, cuando me registro, entonces se crea la cuenta y recibo un JWT.
 - Dado un correo ya registrado, entonces recibo **409** con un mensaje claro _(decisión D-03)_.
+- Dado un nombre visible que ya usa otra cuenta (sin distinguir mayúsculas), entonces recibo **409** con el código `DISPLAY_NAME_TAKEN` (RN-COM-109).
 - Dados datos inválidos o campos no permitidos (como `role`), entonces recibo **400** con el detalle por campo (SEC-API-03).
 - La contraseña se guarda con argon2id, nunca en texto plano.
 - Más de 5 intentos por minuto desde la misma IP → **429** (SEC-API-04).
 
-**Must** · RF-70 · SEC-API-02, 03, 04
+**Must** · RF-70 · RN-COM-109 · SEC-API-02, 03, 04
 
 ### API-02 · Iniciar sesión ↔ también en `hexablock-app`
 Como jugador registrado, quiero iniciar sesión, para acceder a mi progreso.
@@ -49,7 +50,7 @@ Como jugador registrado, quiero iniciar sesión, para acceder a mi progreso.
 
 ### API-03 · Sincronizar mi progreso por juego ↔ también en `hexablock-app`
 Como jugador registrado, quiero que el servidor guarde y combine mi progreso, para no perderlo si cambio de teléfono.
-- Existe una entrada de progreso por usuario, `gameId` y figura de celda (topología; RN-TOP-33, propuesta D-27).
+- Existe una entrada de progreso por usuario y `gameId`, con una sección por figura de celda (topología; RN-TOP-33, D-27).
 - Dado que envío el progreso completo de una variante, entonces el servidor lo **consolida** con el guardado (RN-COM-83) y me devuelve el resultado.
 - Dado que envío el mismo progreso dos veces, entonces el resultado no cambia (RN-COM-84, E-COM-2).
 - Dado que pido mi progreso, entonces recibo el de las 4 variantes (RN-COM-90).

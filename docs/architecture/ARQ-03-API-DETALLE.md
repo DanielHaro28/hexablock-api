@@ -10,7 +10,7 @@
 | No fija | Rutas y DTOs definitivos (`openapi.yaml`), esquema Prisma (Paso 5) |
 | Diagramas | `docs/diagrams/clases.puml` (PlantUML) y `capas.mmd` (Mermaid) |
 
-> Las rutas de esta página son orientativas; las definitivas quedan en `docs/contracts/openapi.yaml` (Paso 5, D-23). El código va en inglés.
+> Las rutas de esta página son orientativas; las definitivas quedan en `docs/contracts/openapi.yaml` (Paso 5, D-23). Todas llevan el prefijo **`/v1`** salvo `/health`, que usan el *healthcheck* de Docker y el monitoreo (D-46). El código va en inglés.
 
 ---
 
@@ -47,13 +47,13 @@ Cada caso de uso es **una clase** en `application/` de su módulo (D-22). El con
 
 | Módulo | Caso de uso | Entrada → salida | Puertos que usa | Ruta orientativa |
 |---|---|---|---|---|
-| `auth` | `RegisterUserUseCase` | `RegisterInput` → `AuthResult` (JWT) | `IUserRepository`, `IPasswordHasher`, `ITokenIssuer` | `POST /auth/register` |
-| `auth` | `LoginUseCase` | `Credentials` → `AuthResult` | `IUserRepository`, `IPasswordHasher`, `ITokenIssuer` | `POST /auth/login` |
-| `progress` | `GetProgressUseCase` | `{ userId }` → progreso de las 4 variantes | `IProgressRepository` | `GET /me/progress` |
-| `progress` | `SyncProgressUseCase` | `{ userId, gameKey, snapshot }` → progreso consolidado | `IProgressRepository`, `IBestAttemptRepository`, `ILevelCatalog`, `ITransactionRunner` | `PUT /me/progress/{gameId}/{topology}` |
-| `leaderboard` | `GetLeaderboardUseCase` | `LeaderboardQuery` (+ `userId?`) → página + posición propia | `IBestAttemptReader` | `GET /leaderboard/{gameId}` |
-| `levels` | `ListLevelsUseCase` | `{ gameId, topology, since? }` → niveles publicados | `ILevelRepository` | `GET /levels` |
-| `levels` | `UpsertLevelUseCase` (admin) | `LevelDefinition` → nivel guardado | `ILevelRepository` | `POST /levels`, `PUT /levels/{id}` |
+| `auth` | `RegisterUserUseCase` | `RegisterInput` → `AuthResult` (JWT) | `IUserRepository`, `IPasswordHasher`, `ITokenIssuer` | `POST /v1/auth/register` |
+| `auth` | `LoginUseCase` | `Credentials` → `AuthResult` | `IUserRepository`, `IPasswordHasher`, `ITokenIssuer` | `POST /v1/auth/login` |
+| `progress` | `GetProgressUseCase` | `{ userId }` → progreso de las 4 variantes | `IProgressRepository` | `GET /v1/me/progress` |
+| `progress` | `SyncProgressUseCase` | `{ userId, gameId, sections }` → progreso consolidado (D-27) | `IProgressRepository`, `IBestAttemptRepository`, `ILevelCatalog`, `ITransactionRunner` | `PUT /v1/me/progress/{gameId}` |
+| `leaderboard` | `GetLeaderboardUseCase` | `LeaderboardQuery` (+ `userId?`) → página + posición propia | `IBestAttemptReader` | `GET /v1/leaderboard/{gameId}` |
+| `levels` | `ListLevelsUseCase` | `{ gameId, topology, since? }` → niveles publicados | `ILevelRepository` | `GET /v1/levels` |
+| `levels` | `UpsertLevelUseCase` (admin) | `LevelDefinition` → nivel guardado | `ILevelRepository` | `POST /v1/levels`, `PUT /v1/levels/{id}` |
 | `health` | `CheckHealthUseCase` | — → estado | `IHealthProbe` | `GET /health` |
 
 **Dominio de cada módulo** (sin NestJS ni Prisma, D-22):

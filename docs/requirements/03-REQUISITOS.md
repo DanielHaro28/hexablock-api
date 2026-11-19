@@ -23,7 +23,7 @@
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-70 | Registra usuarios con correo, contraseña y nombre visible; guarda la contraseña con argon2id y devuelve un JWT. Correo repetido → 409; datos inválidos o campos no permitidos (como `role`) → 400 con detalle por campo | SEC-API-02, SEC-API-03 | §5.2 (1) | Must |
+| RF-70 | Registra usuarios con correo, contraseña y nombre visible; guarda la contraseña con argon2id y devuelve un JWT. Correo o nombre visible repetido → 409 (RN-COM-109); datos inválidos o campos no permitidos (como `role`) → 400 con detalle por campo | SEC-API-02, SEC-API-03 | §5.2 (1) | Must |
 | RF-71 | Inicia sesión y devuelve un JWT con expiración. Credenciales incorrectas → 401 genérico (no revela si el correo existe). Token ausente, expirado o alterado en un endpoint protegido → 401 | SEC-API-02, SEC-API-04 | §5.2 (1) | Must |
 
 ### 1.2 Progreso

@@ -66,4 +66,4 @@
 | Cada RF tiene al menos una historia | ✅ |
 | Cada historia tiene un RF o un RNF | ✅ |
 | Cada ejemplo compartido tiene prueba en ambos repos | ⏳ Pendiente (durante la implementación) |
-| Decisiones abiertas | ⚠️ D-03 (respuesta 409 en el registro), D-19 (quién valida qué en niveles), D-22 (estructura del backend), D-23 (contrato y ejemplos compartidos), D-27 (progreso y ranking por figura) y D-28 (niveles por figura) |
+| Decisiones abiertas | ⚠️ D-03 (respuesta 409 en el registro), D-19 (quién valida qué en niveles), D-28 (niveles por figura), D-47 (identidad de los niveles), D-48 (descarga de niveles), D-49 (sincronización) y D-51 (formato de errores) |

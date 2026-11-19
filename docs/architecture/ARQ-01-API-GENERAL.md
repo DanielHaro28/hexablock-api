@@ -57,7 +57,7 @@ NestJS conecta los puertos con sus implementaciones por inyección de dependenci
 | `auth` | Registro, inicio de sesión, emisión y verificación del JWT, guard de autenticación, guard de roles | RF-70, RF-71 |
 | `users` | Usuario, nombre visible y rol | RF-70 |
 | `progress` | Recibir el snapshot de una variante y figura, consolidar, guardar el progreso y los mejores intentos; entregar el progreso de las 4 variantes; plausibilidad | RF-72, RF-93 |
-| `leaderboard` | Ranking por `gameId`, figura (propuesta D-27) y por nivel, paginado, con la posición propia | RF-74 |
+| `leaderboard` | Ranking por `gameId`, figura (D-27) y por nivel, paginado, con la posición propia | RF-74 |
 | `levels` | Listar niveles publicados; crear y actualizar (admin); validación estructural | RF-80, RF-81, RF-82 |
 | `health` | `GET /health` (API + base de datos) | RF-92 |
 | `common` | Filtro global de errores, pipe de validación, interceptor de accesos HTTP, throttler, configuración validada; aspectos AOP sobre los casos de uso en `common/application/aspects/` (D-42) | RF-91, SEC-API-04, 08, SEC-WEB-06 |
@@ -160,15 +160,14 @@ erDiagram
         uuid id PK
         string email UK
         string passwordHash
-        string displayName
+        string displayName UK
         string role
         datetime createdAt
     }
     PROGRESS {
         uuid userId FK
         string gameId
-        string topology
-        json data
+        json sections
         datetime updatedAt
     }
     BEST_ATTEMPT {
@@ -195,8 +194,8 @@ erDiagram
 
 | Decisión | Motivo |
 |---|---|
-| `PROGRESS` guarda el snapshot de cada variante y figura como **JSON** (`userId` + `gameId` + `topology` como clave; D-25, propuesta D-27) | Cada variante tiene una forma distinta de progreso; el servidor no necesita consultarlo por dentro. **Ojo con el enunciado §5.2** ("una entrada de progreso por usuario y por variante"): la otra opción de D-27 es una fila por `userId` + `gameId` con una sección por figura dentro del JSON (ver `PENDIENTES.md`) |
-| `BEST_ATTEMPT` en una tabla con columnas (no JSON) | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es nulo y cuenta solo el puntaje |
+| `PROGRESS`: **una fila por `userId` + `gameId`** (clave), con una **sección por figura** dentro del JSON `sections` (D-27). Cada sección tiene una de dos formas: récord o niveles (D-45) | Cumple al pie de la letra el enunciado §5.2 ("una entrada de progreso por usuario y por variante"). El servidor no necesita consultar el JSON por dentro: el ranking sale de `BEST_ATTEMPT` |
+| `BEST_ATTEMPT` en una tabla con columnas (no JSON), con la columna `topology` | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es nulo y cuenta solo el puntaje |
 | `LEVEL.data` como JSON + columnas comunes | Esquema común + sección específica por `gameId` (RN-COM-70) |
 
 ## 7. Despliegue
@@ -227,7 +226,7 @@ erDiagram
 |---|---|---|
 | ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | ✅ D-22 (17-11) |
 | ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
-| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-27 (fuera de D-22) |
+| ARQ-B-03 | El progreso se guarda como JSON, en una fila por usuario y `gameId` con una sección por figura (D-27); el contenido tiene una de dos formas, récord o niveles (D-45); los mejores intentos van en una tabla con columnas para el ranking | ✅ D-27, D-45 (19-11) |
 | ARQ-B-04 | El AOP sobre los casos de uso se hace con **clases decoradoras** (registro, métricas, caché del ranking); los mecanismos de NestJS (guards, filtros, pipes, throttler, interceptor de acceso) quedan para la tubería HTTP | ✅ D-42 (19-11) |
 | ARQ-B-05 | Los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) y `openapi.yaml` viven en `docs/contracts/`, la fuente única; las pruebas del backend los leen de ahí y la app usa una copia verificada por su CI | ✅ D-23 (17-11) |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |
