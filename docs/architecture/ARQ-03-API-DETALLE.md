@@ -52,7 +52,7 @@ Cada caso de uso es **una clase** en `application/` de su módulo (D-22). El con
 | `progress` | `GetProgressUseCase` | `{ userId }` → progreso de las 4 variantes | `IProgressRepository` | `GET /v1/me/progress` |
 | `progress` | `SyncProgressUseCase` | `{ userId, gameId, sections }` → progreso consolidado (D-27) | `IProgressRepository`, `IBestAttemptRepository`, `ILevelCatalog`, `ITransactionRunner` | `PUT /v1/me/progress/{gameId}` |
 | `leaderboard` | `GetLeaderboardUseCase` | `LeaderboardQuery` (+ `userId?`) → página + posición propia | `IBestAttemptReader` | `GET /v1/leaderboard/{gameId}` |
-| `levels` | `ListLevelsUseCase` | `{ gameId, topology, since? }` → niveles publicados | `ILevelRepository` | `GET /v1/levels` |
+| `levels` | `ListLevelsUseCase` | `{ gameId, topology, cursor?, limit }` → página de niveles cambiados + `nextCursor` (D-48) | `ILevelRepository` | `GET /v1/levels` |
 | `levels` | `UpsertLevelUseCase` (admin) | `LevelDefinition` → nivel guardado | `ILevelRepository` | `POST /v1/levels`, `PUT /v1/levels/{id}` |
 | `health` | `CheckHealthUseCase` | — → estado | `IHealthProbe` | `GET /health` |
 

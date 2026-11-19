@@ -51,7 +51,7 @@ Como jugador registrado, quiero iniciar sesión, para acceder a mi progreso.
 ### API-03 · Sincronizar mi progreso por juego ↔ también en `hexablock-app`
 Como jugador registrado, quiero que el servidor guarde y combine mi progreso, para no perderlo si cambio de teléfono.
 - Existe una entrada de progreso por usuario y `gameId`, con una sección por figura de celda (topología; RN-TOP-33, D-27).
-- Dado que envío el progreso completo de una variante, entonces el servidor lo **consolida** con el guardado (RN-COM-83) y me devuelve el resultado.
+- Dado que envío resultados de una variante (todos o solo los que cambiaron, D-49), entonces el servidor los **consolida** con el guardado (RN-COM-83) y me devuelve el resultado.
 - Dado que envío el mismo progreso dos veces, entonces el resultado no cambia (RN-COM-84, E-COM-2).
 - Dado que pido mi progreso, entonces recibo el de las 4 variantes (RN-COM-90).
 - El usuario siempre sale del JWT; nunca puedo leer ni escribir el progreso de otro (SEC-API-01).
@@ -74,9 +74,11 @@ Como jugador, quiero consultar el ranking global, para compararme con otros.
 
 ### LVL-01 · Entregar niveles publicados ↔ también en `hexablock-app`
 Como jugador, quiero que la app reciba los niveles nuevos, para tener más contenido sin actualizarla.
-- Dado que se piden los niveles de una variante, entonces la API devuelve los publicados para ese `gameId`, con su versión y su topología (RN-COM-70, 75).
+- Dado que se piden los niveles de una variante y figura sin cursor, entonces la API devuelve la primera página (hasta 100) de los publicados, con su versión, su topología y el cursor siguiente (RN-COM-70, 75, 77).
+- Dado un cursor, entonces solo llegan los niveles creados o actualizados después de él; si no hay cambios, la lista viene vacía.
+- No existe un endpoint para borrar niveles.
 
-**Must** · RF-80 · RN-COM-70, 72, 75
+**Must** · RF-80 · RN-COM-70, 72, 75, 77
 
 ### LVL-02 · Publicar o actualizar un nivel
 Como administrador de contenido, quiero crear o modificar un nivel por la API, para ampliar el juego sin tocar el código de la app.

@@ -30,7 +30,7 @@
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-72 | Recibe el progreso completo de una variante y figura del usuario autenticado (`gameId` y topología obligatorios), lo **consolida** con el guardado y devuelve el resultado; también entrega el progreso de las 4 variantes. El usuario siempre sale del JWT, nunca de la URL ni del cuerpo | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | §5.2 (2) | Must |
+| RF-72 | Recibe los resultados de una variante del usuario autenticado, por figura (todos o solo los que cambiaron, D-49; `gameId` y topología obligatorios), lo **consolida** con el guardado y devuelve el resultado; también entrega el progreso de las 4 variantes. El usuario siempre sale del JWT, nunca de la URL ni del cuerpo | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | §5.2 (2) | Must |
 | RF-73 | _(Sin parte de servidor: importar el progreso de invitado usa la misma sincronización de RF-72)_ | RN-COM-88 | P-08 | — |
 | RF-93 | Rechaza resultados no plausibles (puntaje negativo o por encima del tope de la variante, estrellas fuera de 1–3, nivel inexistente, `gameId` desconocido) | RN-COM-108, SEC-API-06 | Seguridad | Must |
 
@@ -44,7 +44,7 @@
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-80 | Entrega los niveles publicados de una variante, con su versión | RN-COM-70, 72, 75 | §5.2 (4) | Must |
+| RF-80 | Entrega los niveles de una variante y figura creados o actualizados después de un cursor, en páginas de hasta 100, con su versión y el cursor siguiente. No hay borrado de niveles | RN-COM-70, 72, 75, 77 | §5.2 (4) | Must |
 | RF-81 | Permite a un **administrador** crear o actualizar un nivel; usuario sin rol → 403; sin token → 401 | RN-COM-70, 71, SEC-API-05 | §5.2 (4) | Must |
 | RF-82 | Valida cada nivel antes de guardarlo: esquema común + validaciones **estructurales** de su variante; error → 400 con detalle | RN-COM-71, 76, RN-HF-12 (a–e, g), RN-HS-12 | §5.2 (4), D-19 | Must |
 

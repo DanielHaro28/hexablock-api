@@ -56,7 +56,7 @@ NestJS conecta los puertos con sus implementaciones por inyección de dependenci
 |---|---|---|
 | `auth` | Registro, inicio de sesión, emisión y verificación del JWT, guard de autenticación, guard de roles | RF-70, RF-71 |
 | `users` | Usuario, nombre visible y rol | RF-70 |
-| `progress` | Recibir el snapshot de una variante y figura, consolidar, guardar el progreso y los mejores intentos; entregar el progreso de las 4 variantes; plausibilidad | RF-72, RF-93 |
+| `progress` | Recibir los resultados de una variante por figura (todos o solo los que cambiaron, D-49), consolidar, guardar el progreso y los mejores intentos; entregar el progreso de las 4 variantes; plausibilidad | RF-72, RF-93 |
 | `leaderboard` | Ranking por `gameId`, figura (D-27) y por nivel, paginado, con la posición propia | RF-74 |
 | `levels` | Listar niveles publicados; crear y actualizar (admin); validación estructural | RF-80, RF-81, RF-82 |
 | `health` | `GET /health` (API + base de datos) | RF-92 |
@@ -127,7 +127,7 @@ sequenceDiagram
     TH->>G: dentro del límite
     G->>VP: usuario autenticado (sub del JWT)
     VP->>CT: DTO válido (whitelist)
-    CT->>UC: ejecutar(userId del JWT, gameId, figura, snapshot)
+    CT->>UC: ejecutar(userId del JWT, gameId, secciones por figura)
     UC->>R: leer progreso guardado
     UC->>DM: consolidar (RN-COM-83) y verificar plausibilidad
     UC->>R: guardar en una transacción
@@ -189,6 +189,7 @@ erDiagram
         string topology
         json data
         datetime publishedAt
+        datetime updatedAt
     }
 ```
 
@@ -196,6 +197,7 @@ erDiagram
 |---|---|
 | `PROGRESS`: **una fila por `userId` + `gameId`** (clave), con una **sección por figura** dentro del JSON `sections` (D-27). Cada sección tiene una de dos formas: récord o niveles (D-45) | Cumple al pie de la letra el enunciado §5.2 ("una entrada de progreso por usuario y por variante"). El servidor no necesita consultar el JSON por dentro: el ranking sale de `BEST_ATTEMPT` |
 | `BEST_ATTEMPT` en una tabla con columnas (no JSON), con la columna `topology` | El ranking necesita **ordenar y paginar** por estrellas, tiempo, movimientos y puntaje con índices. Para las variantes sin fin, `levelId` es nulo y cuenta solo el puntaje |
+| `LEVEL.updatedAt` con un índice (`gameId`, `topology`, `updatedAt`, `id`) | La descarga por cambios ordena y pagina por esa clave; el cursor la codifica (D-48, RN-COM-77) |
 | `LEVEL.data` como JSON + columnas comunes | Esquema común + sección específica por `gameId` (RN-COM-70) |
 
 ## 7. Despliegue
