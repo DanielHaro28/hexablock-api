@@ -13,8 +13,10 @@ docs/
 ├── architecture/
 │   ├── ARQ-00-SISTEMA.md                  [compartido] vista del sistema (app + API + EC2)
 │   ├── ARQ-01-API-GENERAL.md           arquitectura general de este repo
-│   └── ARQ-03-API-DETALLE.md           casos de uso, puertos, aspectos AOP, patrones y SOLID (Paso 4)
-├── diagrams/                           clases.puml (PlantUML) y capas.mmd (Mermaid) + imágenes .png
+│   ├── ARQ-03-API-DETALLE.md           casos de uso, puertos, aspectos AOP, patrones y SOLID (Paso 4)
+│   └── ARQ-04-API-DATOS.md             esquema Prisma, sincronización, ranking y cursor de niveles (Paso 5)
+├── contracts/                          FUENTE ÚNICA del contrato (D-23): openapi.yaml, schemas/, examples/, check_contracts.py
+├── diagrams/                           clases.puml (PlantUML), capas.mmd y datos.mmd (Mermaid) + imágenes .png
 ├── security/
 │   └── SECURITY-BASELINE.md               [compartido]
 └── requirements/
@@ -26,7 +28,7 @@ docs/
     └── 05-TRAZABILIDAD.md                 enunciado → RF → HU → RN → pruebas (API)
 ```
 
-Se irán agregando con los siguientes pasos: `contracts/openapi.yaml` y los JSON Schema de niveles (Paso 5), y `ops/` (despliegue en EC2).
+Se irá agregando con los siguientes pasos: `ops/` (despliegue en EC2).
 
 **Lo que no está aquí:**
 - Las **reglas de juego** (variantes y topologías) viven solo en `hexablock-app`, porque el backend no ejecuta partidas. El backend solo necesita las reglas de **niveles** y de **cuenta, progreso y ranking**, que están compartidas.

@@ -1,0 +1,41 @@
+erDiagram
+    users ||--o{ progress : "tiene (1 por gameId)"
+    users ||--o{ best_attempts : "tiene"
+    levels ||..o{ best_attempts : "level_id (lógica, sin FK)"
+    users {
+        uuid id PK
+        citext email UK "en minúsculas; nunca sale en una respuesta"
+        text password_hash "argon2id"
+        citext display_name UK "RN-COM-109"
+        role role "USER o ADMIN"
+        timestamptz created_at
+    }
+    progress {
+        uuid user_id PK,FK
+        text game_id PK
+        jsonb sections "una sección por figura (D-27, D-45)"
+        timestamptz updated_at
+    }
+    best_attempts {
+        uuid id PK
+        uuid user_id FK
+        text game_id
+        text topology
+        text level_id "vacío en el récord de Lines y Merge"
+        int stars "solo Fit"
+        int time_ms "solo Fit"
+        int moves "Fit y Sort"
+        int score "Sort, Lines y Merge"
+        timestamptz achieved_at "desempate (RN-COM-105)"
+    }
+    levels {
+        text id PK "fit-hex-001 (D-47)"
+        text game_id
+        text topology "hex, square, tri, cube o any"
+        int order
+        int version
+        jsonb data "el nivel completo, ya validado"
+        bigint change_seq UK "cursor de descarga (D-48)"
+        timestamptz published_at
+        timestamptz updated_at
+    }

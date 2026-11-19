@@ -23,14 +23,14 @@
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-70 | Registra usuarios con correo, contraseña y nombre visible; guarda la contraseña con argon2id y devuelve un JWT. Correo repetido → 409; datos inválidos o campos no permitidos (como `role`) → 400 con detalle por campo | SEC-API-02, SEC-API-03 | §5.2 (1) | Must |
+| RF-70 | Registra usuarios con correo, contraseña y nombre visible; guarda la contraseña con argon2id y devuelve un JWT. Correo o nombre visible repetido → 409 (RN-COM-109); datos inválidos o campos no permitidos (como `role`) → 400 con detalle por campo | SEC-API-02, SEC-API-03 | §5.2 (1) | Must |
 | RF-71 | Inicia sesión y devuelve un JWT con expiración. Credenciales incorrectas → 401 genérico (no revela si el correo existe). Token ausente, expirado o alterado en un endpoint protegido → 401 | SEC-API-02, SEC-API-04 | §5.2 (1) | Must |
 
 ### 1.2 Progreso
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-72 | Recibe el progreso completo de una variante y figura del usuario autenticado (`gameId` y topología obligatorios), lo **consolida** con el guardado y devuelve el resultado; también entrega el progreso de las 4 variantes. El usuario siempre sale del JWT, nunca de la URL ni del cuerpo | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | §5.2 (2) | Must |
+| RF-72 | Recibe los resultados de una variante del usuario autenticado, por figura (todos o solo los que cambiaron, D-49; `gameId` y topología obligatorios), lo **consolida** con el guardado y devuelve el resultado; también entrega el progreso de las 4 variantes. El usuario siempre sale del JWT, nunca de la URL ni del cuerpo | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | §5.2 (2) | Must |
 | RF-73 | _(Sin parte de servidor: importar el progreso de invitado usa la misma sincronización de RF-72)_ | RN-COM-88 | P-08 | — |
 | RF-93 | Rechaza resultados no plausibles (puntaje negativo o por encima del tope de la variante, estrellas fuera de 1–3, nivel inexistente, `gameId` desconocido) | RN-COM-108, SEC-API-06 | Seguridad | Must |
 
@@ -44,7 +44,7 @@
 
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
-| RF-80 | Entrega los niveles publicados de una variante, con su versión | RN-COM-70, 72, 75 | §5.2 (4) | Must |
+| RF-80 | Entrega los niveles de una variante y figura creados o actualizados después de un cursor, en páginas de hasta 100, con su versión y el cursor siguiente. No hay borrado de niveles | RN-COM-70, 72, 75, 77 | §5.2 (4) | Must |
 | RF-81 | Permite a un **administrador** crear o actualizar un nivel; usuario sin rol → 403; sin token → 401 | RN-COM-70, 71, SEC-API-05 | §5.2 (4) | Must |
 | RF-82 | Valida cada nivel antes de guardarlo: esquema común + validaciones **estructurales** de su variante; error → 400 con detalle | RN-COM-71, 76, RN-HF-12 (a–e, g), RN-HS-12 | §5.2 (4), D-19 | Must |
 
@@ -53,7 +53,7 @@
 | ID | La API… | Reglas | Fuente | Prioridad |
 |---|---|---|---|---|
 | RF-90 | Documenta todos los endpoints con Swagger / OpenAPI, público en `/docs` | — | §5.2 (5) | Must |
-| RF-91 | Responde los errores con un formato único `{ code, message, details }`, códigos HTTP correctos y sin stack trace | SEC-API-08, SEC-WEB-07 | §5.2 (6) | Must |
+| RF-91 | Responde los errores con Problem Details (RFC 9457, `application/problem+json`) más `code` y `errors`, con el código HTTP correcto, `WWW-Authenticate` en los 401 y `Retry-After` en los 429, sin stack trace ni valores enviados | SEC-API-08, SEC-WEB-07, D-51 | §5.2 (6) | Must |
 | RF-92 | Expone `GET /health`, que responde 200 cuando la API y la base de datos están disponibles | — | ADR-001 | Must |
 
 ---
