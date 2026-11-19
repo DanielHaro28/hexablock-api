@@ -12,7 +12,9 @@ docs/
 │   └── ADR-001-tech-stack.md              [compartido]
 ├── architecture/
 │   ├── ARQ-00-SISTEMA.md                  [compartido] vista del sistema (app + API + EC2)
-│   └── ARQ-01-API-GENERAL.md           arquitectura general de este repo
+│   ├── ARQ-01-API-GENERAL.md           arquitectura general de este repo
+│   └── ARQ-03-API-DETALLE.md           casos de uso, puertos, aspectos AOP, patrones y SOLID (Paso 4)
+├── diagrams/                           clases.puml (PlantUML) y capas.mmd (Mermaid) + imágenes .png
 ├── security/
 │   └── SECURITY-BASELINE.md               [compartido]
 └── requirements/
@@ -24,7 +26,7 @@ docs/
     └── 05-TRAZABILIDAD.md                 enunciado → RF → HU → RN → pruebas (API)
 ```
 
-Se irán agregando con los siguientes pasos: más documentos en `architecture/` (Paso 4), `contracts/openapi.yaml` y los JSON Schema de niveles (Paso 5), y `ops/` (despliegue en EC2).
+Se irán agregando con los siguientes pasos: `contracts/openapi.yaml` y los JSON Schema de niveles (Paso 5), y `ops/` (despliegue en EC2).
 
 **Lo que no está aquí:**
 - Las **reglas de juego** (variantes y topologías) viven solo en `hexablock-app`, porque el backend no ejecuta partidas. El backend solo necesita las reglas de **niveles** y de **cuenta, progreso y ranking**, que están compartidas.
@@ -38,7 +40,7 @@ Los marcados **[compartido]** existen en los dos repos y deben ser **idénticos*
 ## Orden de lectura sugerido (para integrantes nuevos o para una IA)
 
 1. `ADR-001-tech-stack.md`: qué se usa y por qué (sobre todo §2.2 a §2.4).
-2. `ARQ-00-SISTEMA.md` y `ARQ-01-API-GENERAL.md`: cómo está organizado el sistema y la API.
+2. `ARQ-00-SISTEMA.md` y `ARQ-01-API-GENERAL.md`: cómo está organizado el sistema y la API. `ARQ-03-API-DETALLE.md`: casos de uso, aspectos y patrones.
 3. `01-GLOSARIO.md`: el vocabulario.
 4. `02-RN-CUENTA-PROGRESO-RANKING.md`: consolidación y ranking, el corazón del backend.
 5. `02-RN-NIVELES.md`: esquema y validación de niveles.

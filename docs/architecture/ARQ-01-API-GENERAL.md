@@ -44,9 +44,11 @@ flowchart LR
 | `domain/` | 1 · Entidades | Entidades y reglas puras: consolidación, criterios de mejor intento y de orden del ranking, validación estructural de niveles, plausibilidad | **Nada** de NestJS, Prisma ni otros módulos de infraestructura |
 | `application/` | 2 · Casos de uso | Casos de uso (un servicio por caso) y **puertos** (interfaces de repositorio, hasher, emisor de tokens) | `domain/` |
 | `presentation/` | 3 · Adaptadores (entrada) | Controladores, DTOs con `class-validator`, decoradores de Swagger, mappers DTO ↔ dominio | `application/`, `domain/`, NestJS |
-| `infrastructure/` | 3 y 4 · Adaptadores (salida) y frameworks | Repositorios Prisma, hasher argon2, emisor JWT | Todo lo anterior, Prisma, librerías |
+| `infrastructure/` | 3 · Adaptadores (salida) | Clases que **implementan los puertos**: repositorios Prisma, hasher argon2, emisor JWT | Todo lo anterior, Prisma, librerías |
 
 NestJS conecta los puertos con sus implementaciones por inyección de dependencias en el `*.module.ts` de cada módulo (el *composition root* del módulo).
+
+**Capa 4 (frameworks):** `src/main.ts`, `src/prisma/` (`PrismaService`), los `*.module.ts` y la configuración de NestJS, PostgreSQL y Docker. Así cada carpeta corresponde a una sola capa del enunciado §3.4 (D-22).
 
 ## 3. Módulos
 
@@ -58,7 +60,7 @@ NestJS conecta los puertos con sus implementaciones por inyección de dependenci
 | `leaderboard` | Ranking por `gameId`, figura (propuesta D-27) y por nivel, paginado, con la posición propia | RF-74 |
 | `levels` | Listar niveles publicados; crear y actualizar (admin); validación estructural | RF-80, RF-81, RF-82 |
 | `health` | `GET /health` (API + base de datos) | RF-92 |
-| `common` | Filtro global de errores, pipe de validación, interceptor de logging con redacción, throttler, configuración validada | RF-91, SEC-API-04, 08, SEC-WEB-06 |
+| `common` | Filtro global de errores, pipe de validación, interceptor de accesos HTTP, throttler, configuración validada; aspectos AOP sobre los casos de uso en `common/application/aspects/` (D-42) | RF-91, SEC-API-04, 08, SEC-WEB-06 |
 | `prisma` | `PrismaService` (conexión) | — |
 
 **Dependencias entre módulos:** `progress` y `leaderboard` comparten los **mejores intentos** (`leaderboard` solo los lee). `levels` es independiente. Ningún módulo importa el `infrastructure/` de otro.
@@ -97,7 +99,7 @@ hexablock-api/
 ├── test/
 │   ├── unit/                       # dominio y casos de uso, sin base de datos
 │   ├── e2e/                        # endpoints con Supertest contra Postgres
-│   └── fixtures/                   # ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL)
+│   └── fixtures/                   # datos de prueba propios del backend
 ├── deploy/
 │   ├── docker-compose.yml          # api + postgres + caddy (producción)
 │   └── Caddyfile
@@ -135,11 +137,11 @@ sequenceDiagram
 
 Si algo falla en cualquier punto, el **filtro global de errores** responde con `{ code, message, details }` y el código correcto (400, 401, 403, 404, 409, 429 o 500), sin stack trace (RF-91).
 
-**Transversales con mecanismos de NestJS** (AOP del lado del servidor):
+**Transversales con mecanismos de NestJS** (tubería HTTP). El AOP sobre los casos de uso se hace con clases decoradoras (D-42, `ARQ-03-API-DETALLE.md` §4):
 
 | Necesidad | Mecanismo | Control |
 |---|---|---|
-| Logging de peticiones con redacción de `password` y `token` | Interceptor global | SEC-WEB-06 |
+| Registro de accesos HTTP (estado, duración, *correlation id*); el registro de cada caso de uso, con redacción, lo hace `LoggingAspect` | Interceptor de acceso global | SEC-WEB-06 |
 | Errores uniformes | Filtro de excepciones global | SEC-API-08, SEC-WEB-07 |
 | Autenticación y roles | Guards (denegación por defecto) | SEC-API-02, 05 |
 | Validación de entrada | `ValidationPipe` global | SEC-API-03 |
@@ -216,16 +218,16 @@ erDiagram
 | `application/` no importa `infrastructure/` | Misma regla para `src/modules/*/application/**` | RNF-12 |
 | Sin SQL inseguro | Búsqueda de `$queryRawUnsafe` | SEC-WEB-05 |
 | Respuestas según el contrato | Pruebas de contrato contra `openapi.yaml` | RNF-25 |
-| Consolidación idéntica a la de la app | Pruebas con los ejemplos compartidos de `test/fixtures/` | ARQ-S-03 |
+| Consolidación idéntica a la de la app | Pruebas con los ejemplos compartidos de `docs/contracts/` | ARQ-S-03, D-23 |
 | Dependencias seguras | `npm audit --audit-level=high` | SEC-WEB-02 |
 
 ## 9. Decisiones de este documento
 
 | ID | Decisión | Estado |
 |---|---|---|
-| ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | 🟡 D-22 |
-| ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | 🟡 D-22 |
-| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-22, D-27 |
-| ARQ-B-04 | Las preocupaciones transversales usan los mecanismos de NestJS (interceptores, filtros, guards, pipes) | 🟡 |
-| ARQ-B-05 | Los ejemplos compartidos se guardan como JSON en `test/fixtures/` y son los mismos que usa la app | 🟡 D-23 |
+| ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | ✅ D-22 (17-11) |
+| ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
+| ARQ-B-03 | El progreso se guarda como JSON por `gameId` (y figura, según cómo se cierre D-27); los mejores intentos en una tabla con columnas para el ranking | 🟡 D-27 (fuera de D-22) |
+| ARQ-B-04 | El AOP sobre los casos de uso se hace con **clases decoradoras** (registro, métricas, caché del ranking); los mecanismos de NestJS (guards, filtros, pipes, throttler, interceptor de acceso) quedan para la tubería HTTP | ✅ D-42 (19-11) |
+| ARQ-B-05 | Los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) y `openapi.yaml` viven en `docs/contracts/`, la fuente única; las pruebas del backend los leen de ahí y la app usa una copia verificada por su CI | ✅ D-23 (17-11) |
 | ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |

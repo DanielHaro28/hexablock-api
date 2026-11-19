@@ -1,0 +1,61 @@
+%% Diagrama de capas Clean de hexablock-api (enunciado §4.2). Fuente editable; la imagen es capas.png
+flowchart TB
+    subgraph L4["Capa 4 · Frameworks e infraestructura"]
+        direction TB
+        NEST["NestJS: main.ts · *.module.ts (composition root)<br/>guards · ValidationPipe · throttler · filtro global de errores"]
+        DB["PrismaService · PostgreSQL<br/>Docker · Caddy (HTTPS) en EC2"]
+        subgraph L3["Capa 3 · Adaptadores (presentation/ e infrastructure/)"]
+            direction TB
+            CTRL["Controladores y DTOs<br/>AuthController · ProgressController<br/>LeaderboardController · LevelsController · HealthController"]
+            ADP["Adaptadores de salida<br/>PrismaUserRepository · PrismaProgressRepository<br/>PrismaBestAttemptRepository · PrismaLevelRepository<br/>Argon2PasswordHasher · JwtTokenIssuer"]
+            subgraph L2["Capa 2 · Casos de uso (application/)"]
+                direction TB
+                UC["UseCase&lt;I, O&gt;<br/>RegisterUser · Login · GetProgress · SyncProgress<br/>GetLeaderboard · ListLevels · UpsertLevel · CheckHealth"]
+                ASP["Aspectos AOP (decoradores)<br/>Cache → Metrics → Logging"]
+                PORT(["Puertos<br/>IUserRepository · IProgressRepository · IBestAttemptRepository<br/>IBestAttemptReader · ILevelRepository · IPasswordHasher<br/>ITokenIssuer · ILogger · IMetrics · IClock"])
+                subgraph L1["Capa 1 · Entidades (domain/)"]
+                    direction TB
+                    ENT["User · Role · VariantProgress · BestAttempt · LevelDefinition"]
+                    SRV["ProgressConsolidator · LevelValidator<br/>IRankingPolicy (una por gameId) · IPlausibilityPolicy"]
+                end
+            end
+        end
+    end
+
+    NEST --> CTRL
+    NEST --> ADP
+    DB --> ADP
+    CTRL --> ASP
+    ASP --> UC
+    UC --> PORT
+    ADP -. implementa .-> PORT
+    UC --> ENT
+    UC --> SRV
+    SRV --> ENT
+
+    subgraph LEG["Leyenda"]
+        direction LR
+        K1["Capa 1 · Entidades"]:::c1
+        K2["Capa 2 · Casos de uso"]:::c2
+        K3["Capa 3 · Adaptadores"]:::c3
+        K4["Capa 4 · Frameworks"]:::c4
+        KP(["Puerto (interfaz)"]):::port
+        KA["→ depende de · ⇢ implementa"]:::note
+    end
+
+    classDef c1 fill:#FDE2B5,stroke:#B26A00,color:#3A2300
+    classDef c2 fill:#CDEBD3,stroke:#2E7D32,color:#0F2E13
+    classDef c3 fill:#CFE3F7,stroke:#1565C0,color:#0B2747
+    classDef c4 fill:#E6E0F3,stroke:#5E35B1,color:#221144
+    classDef port fill:#FFFFFF,stroke:#333333,stroke-dasharray:4 3,color:#111111
+    classDef note fill:#FFFFFF,stroke:#FFFFFF,color:#333333
+    class ENT,SRV c1
+    class UC,ASP c2
+    class CTRL,ADP c3
+    class NEST,DB c4
+    class PORT port
+    style L1 fill:#FFF4E0,stroke:#B26A00
+    style L2 fill:#EAF6EC,stroke:#2E7D32
+    style L3 fill:#EAF2FB,stroke:#1565C0
+    style L4 fill:#F4F1FA,stroke:#5E35B1
+    style LEG fill:#FFFFFF,stroke:#999999
