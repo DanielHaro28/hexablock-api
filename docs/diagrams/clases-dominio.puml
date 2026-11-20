@@ -1,0 +1,208 @@
+@startuml clases-dominio
+' Diagrama de clases de DETALLE de hexablock-api: dominio (capa 1) y casos de uso
+' con sus puertos y aspectos (capa 2). Parte de clases.puml (D-76).
+' Los puertos marcados «puerto» tienen sus métodos y sus adaptadores en clases.puml.
+' Imagen: abrir este archivo → Ctrl+Shift+P → "PlantUML: Export Current Diagram" → png.
+' Los nombres son los previstos en ARQ-03-API; se revisan contra el código real.
+
+set namespaceSeparator none
+hide circle
+hide <<puerto>> members
+skinparam linetype ortho
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam ArrowColor #333333
+skinparam ClassBorderColor #333333
+skinparam ClassBackgroundColor #FFFFFF
+skinparam PackageBorderColor #999999
+skinparam nodesep 30
+skinparam ranksep 45
+
+package "Capa 2 · Casos de uso (application/)" {
+  interface UseCase<I, O> <<interface>> {
+    + execute(input: I): Promise<O>
+  }
+  class LoggingAspect<I, O> <<Decorator>> <<AOP>> {
+    - inner: UseCase<I, O>
+    - logger: ILogger
+  }
+  class MetricsAspect<I, O> <<Decorator>> <<AOP>> {
+    - inner: UseCase<I, O>
+    - metrics: IMetrics
+  }
+  class CacheAspect<I, O> <<Proxy>> <<AOP>> {
+    - inner: UseCase<I, O>
+    - clock: IClock
+  }
+  class RegisterUserUseCase {
+    + execute(i: RegisterInput): Promise<AuthResult>
+  }
+  class LoginUseCase {
+    + execute(c: Credentials): Promise<AuthResult>
+  }
+  class GetProgressUseCase {
+    + execute(userId: string): Promise<VariantProgress[]>
+  }
+  class SyncProgressUseCase {
+    + execute(i: SyncInput): Promise<VariantProgress>
+  }
+  class GetLeaderboardUseCase {
+    + execute(q: LeaderboardQuery): Promise<LeaderboardPage>
+  }
+  class ListLevelsUseCase {
+    + execute(q: LevelsQuery): Promise<LevelsPage>
+  }
+  class UpsertLevelUseCase {
+    + execute(l: LevelDefinition): Promise<LevelDefinition>
+  }
+
+  interface IUserRepository <<puerto>>
+  interface IPasswordHasher <<puerto>>
+  interface ITokenIssuer <<puerto>>
+  interface IProgressRepository <<puerto>>
+  interface IBestAttemptRepository <<puerto>>
+  interface IBestAttemptReader <<puerto>>
+  interface ILevelCatalog <<puerto>>
+  interface ILevelRepository <<puerto>>
+  interface ITransactionRunner <<puerto>>
+  interface ILogger <<puerto>>
+  interface IMetrics <<puerto>>
+  interface IClock <<puerto>>
+}
+
+package "Capa 1 · Entidades (domain/)" {
+  class User {
+    + id: string
+    + displayName: string
+    + role: Role
+  }
+  enum Role {
+    PLAYER
+    ADMIN
+  }
+  class VariantProgress {
+    + gameId: string
+    + topology: string
+  }
+  class BestAttempt {
+    + levelId: string?
+    + score: number
+    + stars: number
+    + timeMs: number
+    + moves: number
+  }
+  class ProgressConsolidator {
+    + consolidate(saved: VariantProgress, incoming: VariantProgress): VariantProgress
+  }
+  interface IPlausibilityPolicy <<interface>> <<Strategy>> {
+    + check(a: BestAttempt): void
+  }
+  class PlausibilityPolicies <<Factory Method>> {
+    + for(gameId: string): IPlausibilityPolicy
+  }
+  interface IRankingPolicy <<interface>> <<Strategy>> {
+    + compare(a: BestAttempt, b: BestAttempt): number
+  }
+  class EndlessRanking
+  class FitLevelRanking
+  class SortLevelRanking
+  class LevelsGlobalRanking
+  class RankingPolicies <<Factory Method>> {
+    + for(gameId: string, levelId?: string): IRankingPolicy
+  }
+  class LevelDefinition {
+    + id: string
+    + gameId: string
+    + topology: string
+    + version: number
+  }
+  abstract class LevelValidator <<Template Method>> {
+    + validate(l: LevelDefinition): void
+    # validateSection(l: LevelDefinition): void
+  }
+  class FitLevelValidator
+  class SortLevelValidator
+  abstract class DomainError {
+    + code: string
+  }
+  class ConflictError
+  class ImplausibleResultError
+}
+
+' ===== Aspectos =====
+LoggingAspect ..|> UseCase
+MetricsAspect ..|> UseCase
+CacheAspect ..|> UseCase
+LoggingAspect o-- UseCase : envuelve
+MetricsAspect o-- UseCase : envuelve
+CacheAspect o-- UseCase : cachea
+LoggingAspect --> ILogger
+MetricsAspect --> IMetrics
+CacheAspect --> IClock
+
+' ===== Casos de uso =====
+RegisterUserUseCase ..|> UseCase
+LoginUseCase ..|> UseCase
+GetProgressUseCase ..|> UseCase
+SyncProgressUseCase ..|> UseCase
+GetLeaderboardUseCase ..|> UseCase
+ListLevelsUseCase ..|> UseCase
+UpsertLevelUseCase ..|> UseCase
+RegisterUserUseCase --> IUserRepository
+RegisterUserUseCase --> IPasswordHasher
+RegisterUserUseCase --> ITokenIssuer
+RegisterUserUseCase ..> ConflictError : lanza
+LoginUseCase --> IUserRepository
+LoginUseCase --> IPasswordHasher
+LoginUseCase --> ITokenIssuer
+GetProgressUseCase --> IProgressRepository
+SyncProgressUseCase --> IProgressRepository
+SyncProgressUseCase --> IBestAttemptRepository
+SyncProgressUseCase --> ILevelCatalog
+SyncProgressUseCase --> ITransactionRunner
+IBestAttemptRepository --|> IBestAttemptReader
+GetLeaderboardUseCase --> IBestAttemptReader
+ListLevelsUseCase --> ILevelRepository
+UpsertLevelUseCase --> ILevelRepository
+
+' ===== Capa 2 → capa 1 =====
+SyncProgressUseCase --> ProgressConsolidator : usa
+SyncProgressUseCase --> PlausibilityPolicies : usa
+GetLeaderboardUseCase --> RankingPolicies : usa
+UpsertLevelUseCase --> LevelValidator : usa
+
+' ===== Dominio =====
+User *-- Role
+User "1" o-- "0..*" VariantProgress
+User "1" o-- "0..*" BestAttempt
+BestAttempt --> LevelDefinition : sobre (opcional)
+ProgressConsolidator ..> VariantProgress
+ProgressConsolidator ..> BestAttempt
+PlausibilityPolicies ..> IPlausibilityPolicy : crea
+PlausibilityPolicies ..> ImplausibleResultError : lanza
+RankingPolicies ..> IRankingPolicy : crea
+EndlessRanking ..|> IRankingPolicy
+FitLevelRanking ..|> IRankingPolicy
+SortLevelRanking ..|> IRankingPolicy
+LevelsGlobalRanking ..|> IRankingPolicy
+FitLevelValidator --|> LevelValidator
+SortLevelValidator --|> LevelValidator
+ConflictError --|> DomainError
+ImplausibleResultError --|> DomainError
+
+legend right
+  **Cómo leerlo**
+  «puerto» = interfaz de la capa 2; sus métodos y su adaptador están en clases.puml
+  ..|> implementa una interfaz · --|> hereda
+  --> usa (dependencia que se guarda) · ..> crea, lanza o usa de paso
+  *-- composición · o-- agregación
+  «...» en una clase = patrón de diseño (ARQ-03-API §5) · T? = T o null
+  DomainError también tiene ValidationError, UnauthorizedError,
+  ForbiddenError y NotFoundError (ARQ-03-API §2)
+  CheckHealthUseCase usa IHealthProbe, con el mismo patrón
+endlegend
+
+@enduml
