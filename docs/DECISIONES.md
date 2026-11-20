@@ -8,7 +8,7 @@
 > - Si un documento citado en *Dónde quedó* no está en este repo, está en `hexablock-app`.
 > - Una decisión cerrada solo se reabre si el equipo lo decide explícitamente. Los IDs nunca se reutilizan.
 >
-> **Última actualización:** 2026-11-19
+> **Última actualización:** 2026-11-20
 
 ---
 
@@ -48,6 +48,7 @@
 | ID | Decisión | Dónde quedó | Repos | Fecha |
 |---|---|---|---|---|
 | D-22 | **Estructura del backend:** módulos por área (`auth`, `users`, `progress`, `leaderboard`, `levels`, `health`) con `domain/` (capa 1), `application/` (capa 2: casos de uso y puertos), `presentation/` e `infrastructure/` (capa 3: controladores y DTOs; adaptadores que implementan los puertos, como repositorios Prisma, argon2 y JWT). `main.ts`, `src/prisma/` y la configuración de NestJS son capa 4. **Un caso de uso por clase.** Cómo se guarda el progreso (JSON) queda para D-27 | ARQ-01-API §2 a §4, ARQ-B-01, 02 | API | 17-11 |
+| ARQ-B-06 | **La API no tiene estado:** toda la información vive en PostgreSQL | ARQ-01-API §2 | API | 17-11 |
 | D-23 | **Contrato entre app y API:** `openapi.yaml` y los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) viven en `hexablock-api/docs/contracts/`, la fuente única. La API valida sus respuestas contra ese archivo; la app guarda una **copia** para probar sus mappers y su CI **falla si la copia difiere** de la del repo de la API (es la herramienta "equivalente a Pact" del enunciado §3.6) | ARQ-00 §6 (ARQ-S-05), ARQ-01-API §9 (ARQ-B-05) | Ambos | 17-11 |
 
 ### Arquitectura detallada (Paso 4)
@@ -96,7 +97,21 @@
 | D-65 | **Organización en GitHub.** Un Issue por historia (en los dos repos para las compartidas, enlazados) y por tarea de configuración; etiquetas `type:`, `area:`, `variant:` y `priority:`; los milestones de D-63 en los dos repos; plantillas de Issue (historia, tarea, *bug*) con la Definition of Done (D-64); un tablero de GitHub Projects con los dos repos (Backlog → Por hacer → En curso → En revisión → Hecho) y un campo de horas. Los Issues, etiquetas y milestones se crean con `gh`; el tablero lo crea el dueño desde la web | Issues, `.github/ISSUE_TEMPLATE/`, `docs/plan/PLAN-ENTREGA.md` | Ambos | 20-11 |
 | D-66 | **Ajustes al diseño inicial aceptados** (DIS-01 a DIS-16, `docs/design/REVISION-DISENO.md`). El diseño de @dicpc es una propuesta visual que se adapta a lo definido. Cambios en reglas: RN-HL-71 (salir también guarda el récord, como en Merge) y NAV-05 / RF-08 pasa a *Should*. El PDF queda en `docs/design/` | REVISION-DISENO; RN-HL-71; RF-08 | Ambos | 20-11 |
 
-Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35 y D-37) están en `hexablock-app/docs/DECISIONES.md`.
+### Documentos y seguridad (revisión del 20-11)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-02 | **Reparto de variantes y áreas:** queda cubierto por D-62 y por el responsable de cada Issue (Hexa Merge, @DanielHaro28; el resto, en `PLAN-ENTREGA.md` §5) | D-62; `PLAN-ENTREGA.md` | Ambos | 20-11 |
+| D-67 | **Registro único de decisiones:** este archivo. Los ARQ ya no tienen tablas "Decisiones de este documento": citan los IDs. Las decisiones con ID propio de los ARQ (`ARQ-A-*`, `ARQ-B-*`, `ARQ-S-*`) que no tenían una D-* están aquí con su ID de siempre | ARQ-00 §6, ARQ-01-APP §9, ARQ-01-API §9, ARQ-02 §12, ARQ-03-APP §10 | Ambos | 20-11 |
+| D-69 | **Tareas en un solo lugar:** las tareas (G-*, W-*, A-*, R-*, T-*) viven solo en los Issues. `PENDIENTES.md` tiene las decisiones abiertas y las preguntas al profesor; la hoja de ruta de los pasos está en `PLAN-ENTREGA.md` | `PENDIENTES.md`; `PLAN-ENTREGA.md` §6 | Ambos | 20-11 |
+| D-70 | **`docs/ai/` se reemplaza por `CLAUDE.md`** en cada repo (reglas de trabajo y mapa de documentos) en el Paso 8, y se borra | T-01 (Paso 8) | Ambos | 20-11 |
+| D-71 | **README:** tiene el texto final de patrones, SOLID, AOP y motor genérico (enunciado §6.1), con enlaces al código; los ARQ guardan la justificación y enlazan al README. Se escribe en T-07 | T-07; ARQ-02 §9, ARQ-03-APP §5, §7, §8 | Ambos | 20-11 |
+| D-72 | **Revisión automática de documentos:** los scripts están en `hexablock-app/tools/docs-check/` y corren en el CI de los dos repos (IDs, tablas, ejemplos, documentos compartidos y copia del contrato). `DECISIONES.md` se edita a mano | `tools/docs-check/`; `.github/workflows/docs-check.yml` | Ambos | 20-11 |
+| D-73 | **Binarios:** el PDF del diseño se queda. No se suben archivos binarios de más de 1 MB; las versiones nuevas del diseño van como enlace o como PNG de las pantallas que cambian. Las imágenes de los diagramas se regeneran solo cuando cambia su fuente | `docs/README.md`; `tools/docs-check/` | Ambos | 20-11 |
+| D-74 | **Reporte de vulnerabilidades:** *Private vulnerability reporting* de GitHub, sin publicar correos; `SECURITY.md` en la raíz de cada repo explica cómo usarlo | `SECURITY.md`; SECURITY §7 | Ambos | 20-11 |
+| D-75 | **Keystore de firma del APK (SEC-MOB-07):** nunca está en el repo; va en base64 en un secreto del environment `release`, restringido a tags `v*`; el CI genera `key.properties` y lo borra al terminar; el dueño guarda una copia fuera de línea | SECURITY §5 (SEC-MOB-07); ADR-001 §2.4 | Ambos | 20-11 |
+
+Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35, D-37, D-68 y las `ARQ-A-*`) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## 2. Respuestas del profesor y del enunciado
 
