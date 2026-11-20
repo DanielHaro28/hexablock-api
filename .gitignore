@@ -147,3 +147,10 @@ vite.config.ts.timestamp-*
 
 # Turbo Repo
 .turbo
+
+# Secrets and local agent settings (SECURITY-BASELINE)
+*.pem
+*.key
+*.p12
+.claude/settings.local.json
+CLAUDE.local.md
