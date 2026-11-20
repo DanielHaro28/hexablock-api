@@ -147,7 +147,7 @@ Para el tamaño del proyecto basta el índice `(game_id, topology, level_id)`. C
   - `PUT` con una `version` que no es mayor → `409 stale-version`.
   - El `id` del cuerpo distinto del de la ruta → `400 validation-failed`.
 - **No hay borrado.** Un nivel publicado solo se actualiza (RN-COM-73, 74).
-- **Niveles incluidos en el APK (D-61):** la fuente es `hexablock-app/assets/levels/`. La API guarda una copia en `prisma/seed/levels/`; el *seed* los valida con las mismas reglas estructurales y los publica con `version` del archivo (un `UPSERT` que no baja la versión). El CI de la API compara la copia con la del repo de la app y falla si difieren, como el contrato (D-23) pero al revés.
+- **Niveles incluidos en el APK (D-61):** la fuente es `hexablock-app/app/assets/levels/`. La API guarda una copia en `prisma/seed/levels/`; el *seed* los valida con las mismas reglas estructurales y los publica con `version` del archivo (un `UPSERT` que no baja la versión). El CI de la API compara la copia con la del repo de la app y falla si difieren, como el contrato (D-23) pero al revés.
 
 ## 6. Seguridad de los datos
 
