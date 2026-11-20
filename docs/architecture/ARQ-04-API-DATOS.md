@@ -107,7 +107,7 @@ Todo ocurre en **una transacción** (`SyncProgressUseCase`):
 
 1. Se valida el cuerpo contra `progressUpdate`. Además se revisa que la forma de cada sección corresponda al `gameId` de la ruta (`highScore` para Lines y Merge, `levels` con intentos de Fit o de Sort) → si no, `400 validation-failed`.
 2. **Plausibilidad (RN-COM-108):**
-   - cada `levelId` existe y es de ese `gameId` y de esa figura (o `any`, en Sort). Para eso la API tiene que conocer también los 25 niveles incluidos en el APK: cómo los recibe está abierto en **D-61**;
+   - cada `levelId` existe y es de ese `gameId` y de esa figura (o `any`, en Sort). La API conoce también los 25 niveles incluidos en el APK porque el *seed* los publica (D-61, §5);
    - las estrellas están entre 1 y 3;
    - el puntaje está entre 0 y el tope de la variante (configurable);
    - `achievedAt` no está en el futuro (con 5 minutos de tolerancia por relojes desfasados).
@@ -147,6 +147,7 @@ Para el tamaño del proyecto basta el índice `(game_id, topology, level_id)`. C
   - `PUT` con una `version` que no es mayor → `409 stale-version`.
   - El `id` del cuerpo distinto del de la ruta → `400 validation-failed`.
 - **No hay borrado.** Un nivel publicado solo se actualiza (RN-COM-73, 74).
+- **Niveles incluidos en el APK (D-61):** la fuente es `hexablock-app/assets/levels/`. La API guarda una copia en `prisma/seed/levels/`; el *seed* los valida con las mismas reglas estructurales y los publica con `version` del archivo (un `UPSERT` que no baja la versión). El CI de la API compara la copia con la del repo de la app y falla si difieren, como el contrato (D-23) pero al revés.
 
 ## 6. Seguridad de los datos
 
