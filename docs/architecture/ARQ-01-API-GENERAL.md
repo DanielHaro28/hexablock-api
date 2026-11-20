@@ -228,11 +228,13 @@ erDiagram
 
 ## 9. Decisiones de este documento
 
-| ID | Decisión | Estado |
-|---|---|---|
-| ARQ-B-01 | Módulos por área de negocio, cada uno con `domain`, `application`, `presentation` e `infrastructure` | ✅ D-22 (17-11) |
-| ARQ-B-02 | Un servicio por caso de uso (no servicios "gigantes" por módulo) | ✅ D-22 (17-11) |
-| ARQ-B-03 | El progreso se guarda como JSON, en una fila por usuario y `gameId` con una sección por figura (D-27); el contenido tiene una de dos formas, récord o niveles (D-45); los mejores intentos van en una tabla con columnas para el ranking | ✅ D-27, D-45 (19-11) |
-| ARQ-B-04 | El AOP sobre los casos de uso se hace con **clases decoradoras** (registro, métricas, caché del ranking); los mecanismos de NestJS (guards, filtros, pipes, throttler, interceptor de acceso) quedan para la tubería HTTP | ✅ D-42 (19-11) |
-| ARQ-B-05 | Los ejemplos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL) y `openapi.yaml` viven en `docs/contracts/`, la fuente única; las pruebas del backend los leen de ahí y la app usa una copia verificada por su CI | ✅ D-23 (17-11) |
-| ARQ-B-06 | La API no tiene estado: toda la información vive en PostgreSQL | ✅ |
+Las decisiones están en `docs/DECISIONES.md` (D-67). Los IDs propios de este documento se conservan:
+
+| ID | Dónde está ahora |
+|---|---|
+| ARQ-B-01 | D-22 |
+| ARQ-B-02 | D-22 |
+| ARQ-B-03 | D-27 y D-45 |
+| ARQ-B-04 | D-42 |
+| ARQ-B-05 | D-23 |
+| ARQ-B-06 | `DECISIONES.md` (la API no tiene estado) |

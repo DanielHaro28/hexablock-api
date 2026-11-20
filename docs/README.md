@@ -33,14 +33,23 @@ docs/
 
 Se irá agregando con los siguientes pasos: `ops/` (despliegue en EC2).
 
+Fuera de `docs/`: `SECURITY.md` (cómo reportar una vulnerabilidad, D-74), `.github/pull_request_template.md` y `.github/workflows/docs-check.yml`, que corre en cada PR los scripts de `hexablock-app/tools/docs-check/` sobre los dos repos (D-72).
+
+## Reglas de los documentos
+
+- **Decisiones:** `DECISIONES.md` es el registro y se edita a mano (D-67, D-72). Los demás documentos citan los IDs.
+- **Tareas:** son Issues de los dos repos, en el [tablero](https://github.com/users/DanielHaro28/projects/1) (D-69).
+- **Binarios:** ningún archivo de más de 1 MB (D-73). Lo comprueba el CI.
+- **Seguridad:** nada que no pueda ser público. Ni secretos, ni correos, ni datos de cuentas: los secretos van en el environment `production` de GitHub.
+
 **Lo que no está aquí:**
 - Las **reglas de juego** (variantes y topologías) viven solo en `hexablock-app`, porque el backend no ejecuta partidas. El backend solo necesita las reglas de **niveles** y de **cuenta, progreso y ranking**, que están compartidas.
-- La lista de **pendientes del proyecto** (con las decisiones abiertas) vive solo en `hexablock-app/docs/PENDIENTES.md`.
+- Las **decisiones abiertas** del proyecto viven solo en `hexablock-app/docs/PENDIENTES.md`; las tareas son Issues (D-69).
 - Las decisiones que solo afectan a la app (reglas internas de las variantes y motor genérico) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## Documentos compartidos con `hexablock-app`
 
-Los marcados **[compartido]** existen en los dos repos y deben ser **idénticos**. Un cambio se hace con un PR en cada repo, con el mismo contenido, y se enlazan entre sí. El revisor comprueba que las dos copias queden iguales.
+Los marcados **[compartido]** existen en los dos repos y deben ser **idénticos**. Un cambio se hace con un PR en cada repo, con el mismo contenido, y se enlazan entre sí. El CI de documentos comprueba que las dos copias queden iguales; para eso, los dos PR usan el mismo nombre de rama (D-72).
 
 ## Orden de lectura sugerido (para integrantes nuevos o para una IA)
 
