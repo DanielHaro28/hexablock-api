@@ -17,6 +17,7 @@
 - [ ] `openapi.yaml` updated if an endpoint or DTO changed.
 - [ ] No secrets, tokens or real user data in code, tests or prompts.
 - [ ] `AI_USAGE.md` updated if AI was used in this PR.
+- [ ] If AI wrote code or tests in this PR, a team member reviewed and adjusted the tests, and `AI_USAGE.md` says what changed (D-59).
 
 ## Sensitive changes
 

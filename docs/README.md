@@ -16,6 +16,8 @@ docs/
 │   ├── ARQ-03-API-DETALLE.md           casos de uso, puertos, aspectos AOP, patrones y SOLID (Paso 4)
 │   └── ARQ-04-API-DATOS.md             esquema Prisma, sincronización, ranking y cursor de niveles (Paso 5)
 ├── contracts/                          FUENTE ÚNICA del contrato (D-23): openapi.yaml, schemas/, examples/, check_contracts.py
+├── testing/
+│   └── ESTRATEGIA-PRUEBAS.md           pirámide, dobles, PostgreSQL en tmpfs, cobertura, pruebas del código de IA y CI (Paso 6)
 ├── diagrams/                           clases.puml (PlantUML), capas.mmd y datos.mmd (Mermaid) + imágenes .png
 ├── security/
 │   └── SECURITY-BASELINE.md               [compartido]

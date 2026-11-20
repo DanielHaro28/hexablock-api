@@ -65,7 +65,7 @@
 | RNF-12 | **Arquitectura del backend** | Módulos por dominio (auth, progress, leaderboard, levels). Controladores delgados; la consolidación y los criterios de ranking viven en servicios de dominio sin dependencias de NestJS ni de Prisma; el acceso a datos está detrás de repositorios | Revisión de código; pruebas unitarias de dominio sin base de datos | §3.4 (por coherencia) | Should |
 | RNF-21 | **Suite de pruebas** | Pruebas unitarias (consolidación, ranking, validación de niveles) y de integración de endpoints contra Postgres, incluido el **filtrado por `gameId`**. AAA y nombres `should_[resultado]_when_[condición]` | CI | §3.6 | Must |
 | RNF-22 | **Ejemplos como pruebas** | Los ejemplos de los documentos compartidos (E-COM-2, E-COM-3, E-HF-NIVEL y sus variaciones) tienen prueba en el backend, con los **mismos datos** que en la app | Matriz de trazabilidad | Este documento | Must |
-| RNF-23 | **Cobertura** | Backend ≥ 80 % de líneas | Reporte de cobertura en CI con umbral | Equipo | Should |
+| RNF-23 | **Cobertura** | `domain/` ≥ 90 % de líneas; `application/` ≥ 80 %; total ≥ 70 % | El CI falla debajo del umbral (D-58, `docs/testing/ESTRATEGIA-PRUEBAS.md` §7) | Equipo | Must |
 | RNF-24 | **Integración continua** | Cada PR ejecuta lint, pruebas unitarias, pruebas de integración y de contrato; no se puede integrar a `main` con CI en rojo | Protección de `main` | §3.6 | Must |
 | RNF-25 | **Contrato de la API** | Todas las respuestas cumplen `openapi.yaml`, que es la fuente única del contrato | Pruebas de contrato en CI | §3.6 (recomendado), ADR-001 | Should |
 | RNF-26 | **Mantenibilidad** | 0 advertencias del linter; formato automático; Conventional Commits en inglés validados | CI + commitlint | §6.2 | Must |

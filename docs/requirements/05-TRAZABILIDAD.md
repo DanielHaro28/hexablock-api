@@ -66,4 +66,4 @@
 | Cada RF tiene al menos una historia | ✅ |
 | Cada historia tiene un RF o un RNF | ✅ |
 | Cada ejemplo compartido tiene prueba en ambos repos | ⏳ Pendiente (durante la implementación) |
-| Decisiones abiertas | ⚠️ D-03 (respuesta 409 en el registro) y D-28 (niveles por figura) |
+| Decisiones abiertas | ⚠️ D-03 (respuesta 409 en el registro) |
