@@ -75,6 +75,14 @@
 | D-52 | **Contraseñas (opción A, NIST SP 800-63B rev. 4):** de 15 a 128 caracteres, porque la contraseña es el único factor; sin reglas de composición ni cambio obligatorio; espacios y Unicode permitidos; nunca se truncan; se rechazan las de una lista pública de contraseñas comunes incluida en el backend. Errores `too-short`, `too-long` y `too-common`, sin repetir la contraseña | SEC-API-02, API-01, `openapi.yaml` (`Password`) | Ambos | 19-11 |
 | D-50 | **Nombre visible único (opción A):** sin distinguir mayúsculas, de 3 a 20 caracteres (letras, números, espacio, `_`, `-` y `.`). Si ya existe, `409` con el código `display-name-taken` (escritura ajustada por D-51) | RN-COM-109, glosario, RF-70, API-01 | Ambos | 19-11 |
 
+### Contenido y pruebas (Paso 6)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-57 | **Base de datos de las pruebas de integración en memoria.** App: Drift con `NativeDatabase.memory()`. API: PostgreSQL real como *service container* de GitHub Actions con los datos en `tmpfs` (RAM), el mismo motor que producción. Costo: los repos son públicos y los *runners* estándar no gastan minutos; el contenedor suma unos segundos por ejecución | Estrategia de pruebas de cada repo; ARQ-04-API | Ambos | 20-11 |
+| D-58 | **Cobertura mínima que hace fallar el CI:** dominio ≥ 90 %, casos de uso ≥ 80 %, total ≥ 70 %, en los dos repos. La interfaz cuenta en el total pero no tiene umbral propio | Estrategia de pruebas; CI | Ambos | 20-11 |
+| D-59 | **Pruebas del código generado por IA (opción C):** la IA escribe el código y sus pruebas, y el equipo las revisa y ajusta antes de aprobar el PR; en `AI_USAGE.md` queda qué ajustó cada integrante. Puede cambiar a B (primero las pruebas del equipo) si en la práctica la revisión no alcanza. Riesgo aceptado: el enunciado §7.3 dice "preferiblemente" el equipo, así que C se permite, pero deja menos evidencia propia | Estrategia de pruebas; plantilla de PR; AI_USAGE | Ambos | 20-11 |
+
 Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35 y D-37) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## 2. Respuestas del profesor y del enunciado
