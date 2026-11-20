@@ -118,7 +118,7 @@ services:
 Pasos, en orden:
 1. `npm ci`
 2. `npm run lint` y `npm run format:check`
-3. Contrato: `python3 docs/contracts/check_contracts.py` y un linter de OpenAPI (Redocly o Spectral)
+3. Contrato: `python3 docs/contracts/check_contracts.py` y un linter de OpenAPI (Redocly o Spectral); `prisma/seed/levels/` igual a `hexablock-app/app/assets/levels/` (D-61)
 4. `npx prisma migrate deploy` sobre la base de prueba
 5. `npm test -- --coverage` (unitarias, integración y e2e, con los umbrales de §7)
 6. Script de trazabilidad (§6)

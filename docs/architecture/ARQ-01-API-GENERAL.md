@@ -95,7 +95,8 @@ hexablock-api/
 │       └── health/
 ├── prisma/
 │   ├── schema.prisma
-│   └── migrations/
+│   ├── migrations/
+│   └── seed/                       # admin inicial y copia de los niveles de la app (D-61)
 ├── test/
 │   ├── unit/                       # dominio y casos de uso, sin base de datos
 │   ├── integration/                # repositorios Prisma contra Postgres en tmpfs (D-57)
