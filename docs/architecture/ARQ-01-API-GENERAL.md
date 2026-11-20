@@ -98,7 +98,9 @@ hexablock-api/
 │   └── migrations/
 ├── test/
 │   ├── unit/                       # dominio y casos de uso, sin base de datos
+│   ├── integration/                # repositorios Prisma contra Postgres en tmpfs (D-57)
 │   ├── e2e/                        # endpoints con Supertest contra Postgres
+│   ├── support/                    # fakes, stubs y spies (D-56)
 │   └── fixtures/                   # datos de prueba propios del backend
 ├── deploy/
 │   ├── docker-compose.yml          # api + postgres + caddy (producción)
