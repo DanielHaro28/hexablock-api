@@ -19,7 +19,7 @@ docs/
 ├── (plan)                              el plan de entrega vive en hexablock-app/docs/plan/PLAN-ENTREGA.md (Issues de los dos repos)
 ├── testing/
 │   └── ESTRATEGIA-PRUEBAS.md           pirámide, dobles, PostgreSQL en tmpfs, cobertura, pruebas del código de IA y CI (Paso 6)
-├── diagrams/                           clases.puml (PlantUML), capas.mmd y datos.mmd (Mermaid) + imágenes .png
+├── diagrams/                           clases.puml (general) y clases-dominio.puml (PlantUML, D-76); capas.mmd y datos.mmd (Mermaid) + imágenes .png
 ├── security/
 │   └── SECURITY-BASELINE.md               [compartido]
 └── requirements/

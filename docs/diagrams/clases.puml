@@ -1,231 +1,190 @@
 @startuml clases
-' Diagrama de clases de hexablock-api (enunciado §4.1, D-43).
-' Fuente editable. La imagen (clases.png) se genera con la extensión de PlantUML de VS Code:
-' abrir este archivo → Ctrl+Shift+P → "PlantUML: Export Current Diagram" → png.
-' Colores por capa de la Clean Architecture; estereotipos «...» = patrón de diseño.
+' Diagrama de clases GENERAL de hexablock-api (enunciado §4.1, D-43, D-76).
+' Muestra las 4 capas y cómo se comunican: los controladores (capa 3) usan casos de
+' uso (capa 2), que dependen de puertos; los adaptadores de Prisma, argon2 y JWT
+' implementan esos puertos. Las flechas apuntan siempre hacia el dominio.
+' El detalle del dominio y de los casos de uso está en clases-dominio.puml.
+' Imagen: abrir este archivo → Ctrl+Shift+P → "PlantUML: Export Current Diagram" → png.
 ' Los nombres son los previstos en ARQ-03-API; se revisan contra el código real.
 
 set namespaceSeparator none
+hide circle
+skinparam linetype ortho
 skinparam shadowing false
 skinparam classAttributeIconSize 0
 skinparam packageStyle rectangle
 skinparam defaultFontName Arial
 skinparam defaultFontSize 12
-skinparam ArrowColor #444444
-skinparam ClassBorderColor #555555
-hide empty members
+skinparam ArrowColor #333333
+skinparam ClassBorderColor #333333
+skinparam ClassBackgroundColor #FFFFFF
+skinparam PackageBorderColor #999999
+skinparam nodesep 30
+skinparam ranksep 45
 
-package "Capa 1 · Entidades (domain/)" #FFF4E0 {
-  class User {
-    + id: string
-    + displayName: string
-    + role: Role
+package "Capa 4 · Frameworks (NestJS, Prisma)" {
+  class PrismaService <<Singleton via DI>> {
+    + client: PrismaClient
   }
-  enum Role {
-    PLAYER
-    ADMIN
+  class JwtAuthGuard <<Chain of Responsibility>> {
+    + canActivate(ctx: ExecutionContext): boolean
   }
-  class VariantProgress {
-    + gameId: string
-    + topology: string
+  class RolesGuard <<Chain of Responsibility>> {
+    + canActivate(ctx: ExecutionContext): boolean
   }
-  class BestAttempt {
-    + levelId: string?
-    + score: number
-    + stars: number
-    + timeMs: number
-    + moves: number
+  class GlobalExceptionFilter {
+    + catch(e: unknown, host: ArgumentsHost): void
   }
-  class ProgressConsolidator {
-    + consolidate(saved: VariantProgress, incoming: VariantProgress): VariantProgress
-  }
-  interface IPlausibilityPolicy <<Strategy>> {
-    + check(attempt: BestAttempt): void
-  }
-  class PlausibilityPolicies <<Factory Method>> {
-    + for(gameId: string): IPlausibilityPolicy
-  }
-  interface IRankingPolicy <<Strategy>> {
-    + compare(a: BestAttempt, b: BestAttempt): number
-  }
-  class EndlessRanking
-  class FitLevelRanking
-  class SortLevelRanking
-  class LevelsGlobalRanking
-  class RankingPolicies <<Factory Method>> {
-    + for(gameId: string, levelId?: string): IRankingPolicy
-  }
-  class LevelDefinition {
-    + id: string
-    + gameId: string
-    + topology: string
-    + version: number
-  }
-  abstract class LevelValidator <<Template Method>> {
-    + validate(level: LevelDefinition): void
-    # validateSection(level: LevelDefinition): void
-  }
-  class FitLevelValidator
-  class SortLevelValidator
-  abstract class DomainError
-  class ValidationError
-  class ImplausibleResultError
-  class UnauthorizedError
-  class ForbiddenError
-  class NotFoundError
-  class ConflictError
-}
-
-package "Capa 2 · Casos de uso (application/)" #EAF6EC {
-  interface UseCase<I, O> {
-    + execute(input: I): Promise<O>
-  }
-  class RegisterUserUseCase
-  class LoginUseCase
-  class GetProgressUseCase
-  class SyncProgressUseCase
-  class GetLeaderboardUseCase
-  class ListLevelsUseCase
-  class UpsertLevelUseCase
-  class CheckHealthUseCase
-  class LoggingAspect<I, O> <<Decorator>> <<AOP>>
-  class MetricsAspect<I, O> <<Decorator>> <<AOP>>
-  class CacheAspect<I, O> <<Proxy>> <<AOP>>
-  interface IUserRepository
-  interface IProgressRepository
-  interface IBestAttemptRepository
-  interface IBestAttemptReader
-  interface ILevelRepository
-  interface ILevelCatalog
-  interface ITransactionRunner
-  interface IPasswordHasher
-  interface ITokenIssuer
-  interface IHealthProbe
-  interface ILogger
-  interface IMetrics
-  interface IClock
-}
-
-package "Capa 3 · Adaptadores (presentation/ e infrastructure/)" #EAF2FB {
-  class AuthController
-  class ProgressController
-  class LeaderboardController
-  class LevelsController
-  class HealthController
-  class PrismaUserRepository <<Adapter>>
-  class PrismaProgressRepository <<Adapter>>
-  class PrismaBestAttemptRepository <<Adapter>>
-  class PrismaLevelRepository <<Adapter>>
-  class PrismaTransactionRunner <<Adapter>>
-  class Argon2PasswordHasher <<Adapter>>
-  class JwtTokenIssuer <<Adapter>>
-  class PrismaHealthProbe <<Adapter>>
-}
-
-package "Capa 4 · Frameworks (NestJS, Prisma)" #F4F1FA {
-  class PrismaService <<Singleton via DI>>
-  class JwtAuthGuard <<Chain of Responsibility>>
-  class RolesGuard <<Chain of Responsibility>>
-  class GlobalExceptionFilter
-  class AccessLogInterceptor
   class LeaderboardModule {
     + useFactory(): UseCase
   }
 }
 
-' ===== Herencia e implementación =====
-IRankingPolicy <|.. EndlessRanking
-IRankingPolicy <|.. FitLevelRanking
-IRankingPolicy <|.. SortLevelRanking
-IRankingPolicy <|.. LevelsGlobalRanking
-LevelValidator <|-- FitLevelValidator
-LevelValidator <|-- SortLevelValidator
-DomainError <|-- ValidationError
-DomainError <|-- ImplausibleResultError
-DomainError <|-- UnauthorizedError
-DomainError <|-- ForbiddenError
-DomainError <|-- NotFoundError
-DomainError <|-- ConflictError
-UseCase <|.. RegisterUserUseCase
-UseCase <|.. LoginUseCase
-UseCase <|.. GetProgressUseCase
-UseCase <|.. SyncProgressUseCase
-UseCase <|.. GetLeaderboardUseCase
-UseCase <|.. ListLevelsUseCase
-UseCase <|.. UpsertLevelUseCase
-UseCase <|.. CheckHealthUseCase
-UseCase <|.. LoggingAspect
-UseCase <|.. MetricsAspect
-UseCase <|.. CacheAspect
-IBestAttemptReader <|-- IBestAttemptRepository
-IUserRepository <|.. PrismaUserRepository
-IProgressRepository <|.. PrismaProgressRepository
-IBestAttemptRepository <|.. PrismaBestAttemptRepository
-ILevelRepository <|.. PrismaLevelRepository
-ILevelCatalog <|.. PrismaLevelRepository
-ITransactionRunner <|.. PrismaTransactionRunner
-IPasswordHasher <|.. Argon2PasswordHasher
-ITokenIssuer <|.. JwtTokenIssuer
-IHealthProbe <|.. PrismaHealthProbe
+package "Capa 3 · Adaptadores (presentation/ e infrastructure/)" {
+  class AuthController {
+    + register(dto: RegisterDto): AuthResult
+    + login(dto: LoginDto): AuthResult
+  }
+  class ProgressController {
+    + get(user: User): ProgressDto[]
+    + sync(user: User, gameId: string, dto: SyncDto): ProgressDto
+  }
+  class LeaderboardController {
+    + get(gameId: string, q: LeaderboardQueryDto): LeaderboardPage
+  }
+  class LevelsController {
+    + list(q: LevelsQueryDto): LevelsPage
+    + upsert(dto: LevelDto): LevelDefinition
+  }
+  class PrismaUserRepository <<Adapter>> {
+    - prisma: PrismaService
+  }
+  class PrismaProgressRepository <<Adapter>> {
+    - prisma: PrismaService
+  }
+  class PrismaBestAttemptRepository <<Adapter>> {
+    - prisma: PrismaService
+  }
+  class PrismaLevelRepository <<Adapter>> {
+    - prisma: PrismaService
+  }
+  class PrismaTransactionRunner <<Adapter>> {
+    - prisma: PrismaService
+  }
+  class Argon2PasswordHasher <<Adapter>>
+  class JwtTokenIssuer <<Adapter>>
+}
 
-' ===== Asociación, agregación y composición =====
-User *-- Role
-User "1" o-- "0..*" VariantProgress
-User "1" o-- "0..*" BestAttempt
-BestAttempt --> LevelDefinition : sobre (opcional)
-PlausibilityPolicies ..> IPlausibilityPolicy : crea
-RankingPolicies ..> IRankingPolicy : crea
-LoggingAspect o-- UseCase : envuelve
-MetricsAspect o-- UseCase : envuelve
-CacheAspect o-- UseCase : cachea
-LoggingAspect --> ILogger
-MetricsAspect --> IMetrics
-CacheAspect --> IClock
-RegisterUserUseCase --> IUserRepository
-RegisterUserUseCase --> IPasswordHasher
-RegisterUserUseCase --> ITokenIssuer
-RegisterUserUseCase ..> ConflictError : lanza
-LoginUseCase --> IUserRepository
-LoginUseCase --> IPasswordHasher
-LoginUseCase --> ITokenIssuer
-GetProgressUseCase --> IProgressRepository
-SyncProgressUseCase --> IProgressRepository
-SyncProgressUseCase --> IBestAttemptRepository
-SyncProgressUseCase --> ILevelCatalog
-SyncProgressUseCase --> ITransactionRunner
-SyncProgressUseCase --> ProgressConsolidator
-SyncProgressUseCase --> PlausibilityPolicies
-GetLeaderboardUseCase --> IBestAttemptReader
-GetLeaderboardUseCase --> RankingPolicies
-ListLevelsUseCase --> ILevelRepository
-UpsertLevelUseCase --> ILevelRepository
-UpsertLevelUseCase --> LevelValidator
-CheckHealthUseCase --> IHealthProbe
-AuthController --> UseCase : RegisterUser, Login
-ProgressController --> UseCase : GetProgress, SyncProgress
-LeaderboardController --> UseCase : GetLeaderboard (envuelto)
-LevelsController --> UseCase : ListLevels, UpsertLevel
-HealthController --> UseCase : CheckHealth
+package "Capa 2 · Casos de uso (application/)" {
+  interface UseCase<I, O> <<interface>> {
+    + execute(input: I): Promise<O>
+  }
+  class CacheAspect<I, O> <<Proxy>> <<AOP>> {
+    - inner: UseCase<I, O>
+    - clock: IClock
+  }
+  class LoginUseCase {
+    + execute(c: Credentials): Promise<AuthResult>
+  }
+  class SyncProgressUseCase {
+    + execute(i: SyncInput): Promise<VariantProgress>
+  }
+  class GetLeaderboardUseCase {
+    + execute(q: LeaderboardQuery): Promise<LeaderboardPage>
+  }
+  interface IUserRepository <<interface>> {
+    + findByEmail(email: string): Promise<User?>
+  }
+  interface IProgressRepository <<interface>> {
+    + lockForUpdate(userId: string, gameId: string): Promise<VariantProgress?>
+    + save(p: VariantProgress): Promise<void>
+  }
+  interface IBestAttemptReader <<interface>> {
+    + page(q: LeaderboardQuery): Promise<BestAttempt[]>
+  }
+  interface IBestAttemptRepository <<interface>> {
+    + upsert(a: BestAttempt): Promise<void>
+  }
+  interface ILevelRepository <<interface>> {
+    + changedSince(cursor: bigint, limit: number): Promise<LevelDefinition[]>
+  }
+  interface ITransactionRunner <<interface>> {
+    + run<T>(fn: () => Promise<T>): Promise<T>
+  }
+  interface IPasswordHasher <<interface>> {
+    + verify(hash: string, password: string): Promise<boolean>
+  }
+  interface ITokenIssuer <<interface>> {
+    + issue(u: User): Promise<string>
+    + verify(token: string): Promise<TokenClaims>
+  }
+}
+
+package "Capa 1 · Entidades (domain/)" {
+  class ProgressConsolidator {
+    + consolidate(saved: VariantProgress, incoming: VariantProgress): VariantProgress
+  }
+  interface IRankingPolicy <<interface>> <<Strategy>> {
+    + compare(a: BestAttempt, b: BestAttempt): number
+  }
+  abstract class DomainError {
+    + code: string
+  }
+}
+
+' ===== Capa 4 =====
+LeaderboardModule ..> CacheAspect : arma
+LeaderboardModule ..> GetLeaderboardUseCase : arma
+JwtAuthGuard ..> ITokenIssuer : verifica el JWT
+GlobalExceptionFilter ..> DomainError : traduce a Problem Details
 PrismaUserRepository --> PrismaService
 PrismaProgressRepository --> PrismaService
 PrismaBestAttemptRepository --> PrismaService
 PrismaLevelRepository --> PrismaService
-PrismaHealthProbe --> PrismaService
-GlobalExceptionFilter ..> DomainError : traduce a HTTP
-JwtAuthGuard ..> ITokenIssuer : verifica el JWT
-RolesGuard ..> Role : exige ADMIN
-AccessLogInterceptor --> ILogger
-LeaderboardModule ..> CacheAspect : arma
-LeaderboardModule ..> GetLeaderboardUseCase : arma
+PrismaTransactionRunner --> PrismaService
+
+' ===== Capa 3 → capa 2 =====
+AuthController --> UseCase : Register, Login
+ProgressController --> UseCase : GetProgress, SyncProgress
+LeaderboardController --> UseCase : GetLeaderboard (con caché)
+LevelsController --> UseCase : ListLevels, UpsertLevel
+PrismaUserRepository ..|> IUserRepository
+PrismaProgressRepository ..|> IProgressRepository
+PrismaBestAttemptRepository ..|> IBestAttemptRepository
+PrismaLevelRepository ..|> ILevelRepository
+PrismaTransactionRunner ..|> ITransactionRunner
+Argon2PasswordHasher ..|> IPasswordHasher
+JwtTokenIssuer ..|> ITokenIssuer
+
+' ===== Capa 2 =====
+CacheAspect ..|> UseCase
+CacheAspect o-- UseCase : cachea
+LoginUseCase ..|> UseCase
+SyncProgressUseCase ..|> UseCase
+GetLeaderboardUseCase ..|> UseCase
+IBestAttemptRepository --|> IBestAttemptReader
+LoginUseCase --> IUserRepository
+LoginUseCase --> IPasswordHasher
+LoginUseCase --> ITokenIssuer
+SyncProgressUseCase --> IProgressRepository
+SyncProgressUseCase --> IBestAttemptRepository
+SyncProgressUseCase --> ITransactionRunner
+GetLeaderboardUseCase --> IBestAttemptReader
+
+' ===== Capa 2 → capa 1 =====
+SyncProgressUseCase --> ProgressConsolidator : usa
+GetLeaderboardUseCase --> IRankingPolicy : usa
 
 legend right
-  |= Color |= Capa |
-  |<#FFF4E0> | 1 · Entidades (domain/) |
-  |<#EAF6EC> | 2 · Casos de uso (application/) |
-  |<#EAF2FB> | 3 · Adaptadores |
-  |<#F4F1FA> | 4 · Frameworks |
-  «...» en una clase = patrón de diseño (ARQ-03-API §5)
-  Cada módulo registra sus casos de uso envueltos como LeaderboardModule
+  **Cómo leerlo**
+  ..|> implementa una interfaz · --|> hereda
+  --> usa (dependencia que se guarda) · ..> crea o usa de paso
+  o-- agregación (el aspecto envuelve otro caso de uso)
+  «...» en una clase = patrón de diseño (ARQ-03-API §5) · T? = T o null
+  Todas las flechas entre capas apuntan hacia la capa 1
+  Los demás casos de uso, el dominio completo y los aspectos de
+  registro y métricas están en clases-dominio.puml
+  HealthController, PrismaHealthProbe y AccessLogInterceptor siguen el mismo patrón
 endlegend
 
 @enduml

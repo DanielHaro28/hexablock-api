@@ -8,7 +8,7 @@
 | Parte de | `ARQ-01-API-GENERAL.md` (módulos, estructura, recorrido de una petición) y D-22 |
 | Fija | Forma de los casos de uso, errores, casos de uso y puertos por módulo, aspectos AOP, mecanismos HTTP de NestJS, patrones y ejemplos de SOLID |
 | No fija | Rutas, DTOs y datos: `docs/contracts/` y `ARQ-04-API-DATOS.md` (Paso 5) |
-| Diagramas | `docs/diagrams/clases.puml` (PlantUML) y `capas.mmd` (Mermaid) |
+| Diagramas | `docs/diagrams/clases.puml` y `clases-dominio.puml` (PlantUML, D-76) y `capas.mmd` (Mermaid) |
 
 > Las rutas definitivas están en `docs/contracts/openapi.yaml` (Paso 5, D-23); si esta página y el contrato difieren, manda el contrato. Todas llevan el prefijo **`/v1`** salvo `/health`, que usan el *healthcheck* de Docker y el monitoreo (D-46). El código va en inglés.
 
@@ -184,7 +184,8 @@ El orden es el mismo que en la app: lo de afuera decide si hace falta ejecutar (
 
 | Diagrama | Fuente editable | Imagen para el README | Cómo se genera |
 |---|---|---|---|
-| Clases | `docs/diagrams/clases.puml` | `docs/diagrams/clases.png` | DanielHaro28, con la extensión de PlantUML de VS Code |
+| Clases, general (capas 1 a 4 y cómo se comunican) | `docs/diagrams/clases.puml` | `docs/diagrams/clases.png` | DanielHaro28, con la extensión de PlantUML de VS Code |
+| Clases, dominio y casos de uso | `docs/diagrams/clases-dominio.puml` | `docs/diagrams/clases-dominio.png` | Igual |
 | Capas Clean | `docs/diagrams/capas.mmd` | `docs/diagrams/capas.png` | Generada con Mermaid al escribirlo |
 
 El diagrama de extensibilidad es del juego: vive en `hexablock-app`.
