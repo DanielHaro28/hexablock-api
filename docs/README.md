@@ -33,7 +33,7 @@ docs/
 
 Se irá agregando con los siguientes pasos: `ops/` (despliegue en EC2).
 
-Fuera de `docs/`: `SECURITY.md` (cómo reportar una vulnerabilidad, D-74), `.github/pull_request_template.md` y `.github/workflows/docs-check.yml`, que corre en cada PR los scripts de `hexablock-app/tools/docs-check/` sobre los dos repos (D-72).
+Fuera de `docs/`: `CLAUDE.md` y `.claude/` (configuración de Claude Code, paso 8), `docs/ai/APPROVED-TOOLS.md` [compartido] (herramientas de IA aprobadas, D-86), `SECURITY.md` (cómo reportar una vulnerabilidad, D-74), `.github/pull_request_template.md` y `.github/workflows/docs-check.yml`, que corre en cada PR los scripts de `hexablock-app/tools/docs-check/` sobre los dos repos (D-72).
 
 ## Reglas de los documentos
 
