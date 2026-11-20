@@ -86,6 +86,13 @@
 | D-58 | **Cobertura mínima que hace fallar el CI:** dominio ≥ 90 %, casos de uso ≥ 80 %, total ≥ 70 %, en los dos repos. La interfaz cuenta en el total pero no tiene umbral propio | Estrategia de pruebas; CI | Ambos | 20-11 |
 | D-59 | **Pruebas del código generado por IA (opción C):** la IA escribe el código y sus pruebas, y el equipo las revisa y ajusta antes de aprobar el PR; en `AI_USAGE.md` queda qué ajustó cada integrante. Puede cambiar a B (primero las pruebas del equipo) si en la práctica la revisión no alcanza. Riesgo aceptado: el enunciado §7.3 dice "preferiblemente" el equipo, así que C se permite, pero deja menos evidencia propia | Estrategia de pruebas; plantilla de PR; AI_USAGE | Ambos | 20-11 |
 
+### Plan (Paso 7)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-64 | **Definition of Done** (Scrum Guide 2020: descripción formal del estado del incremento cuando cumple las medidas de calidad; es binaria y la crea el equipo). Una historia está hecha cuando: (1) cumple sus criterios de aceptación; (2) tiene pruebas con la convención del enunciado §3.6 y los ejemplos `E-*` que le tocan, revisadas por una persona (D-59); (3) el CI está en verde: formato, análisis, pruebas, cobertura (D-58), arquitectura (D-36) y contrato (D-23); (4) el PR usa la plantilla y lo revisó alguien de otra área; (5) los textos están en es y en, sin textos fijos; (6) si es una pantalla, sigue el diseño acordado (D-66); (7) documentos, trazabilidad y `AI_USAGE.md` al día (enunciado §7); (8) está fusionada en `main` y funciona en el APK de desarrollo o, en la API, desplegada en EC2. No hay "casi hecho": si falta un punto, la historia sigue abierta | Plantillas de Issue y de PR; ESTRATEGIA-PRUEBAS | Ambos | 20-11 |
+| D-66 | **Ajustes al diseño inicial aceptados** (DIS-01 a DIS-16, `docs/design/REVISION-DISENO.md`). El diseño de @dicpc es una propuesta visual que se adapta a lo definido. Cambios en reglas: RN-HL-71 (salir también guarda el récord, como en Merge) y NAV-05 / RF-08 pasa a *Should*. El PDF queda en `docs/design/` | REVISION-DISENO; RN-HL-71; RF-08 | Ambos | 20-11 |
+
 Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35 y D-37) están en `hexablock-app/docs/DECISIONES.md`.
 
 ## 2. Respuestas del profesor y del enunciado
