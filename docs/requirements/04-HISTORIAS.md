@@ -31,7 +31,7 @@
 ### API-01 · Registrarme ↔ también en `hexablock-app`
 Como jugador, quiero crear una cuenta, para guardar mi progreso en el servidor.
 - Dado un correo no registrado y datos válidos, cuando me registro, entonces se crea la cuenta y recibo un JWT.
-- Dado un correo ya registrado, entonces recibo **409** con un mensaje claro _(decisión D-03)_.
+- Dado un correo ya registrado, entonces recibo **409** `email-taken` con un mensaje claro (D-03: riesgo de enumeración aceptado, mitigado con SEC-API-04).
 - Dado un nombre visible que ya usa otra cuenta (sin distinguir mayúsculas), entonces recibo **409** con el código `display-name-taken` (RN-COM-109).
 - Dados datos inválidos o campos no permitidos (como `role`), entonces recibo **400** con el detalle por campo (SEC-API-03).
 - Dada una contraseña de menos de 15 o más de 128 caracteres, o que está en la lista de contraseñas comunes, entonces recibo **400** con `too-short`, `too-long` o `too-common` en `/password`, sin que se repita la contraseña (SEC-API-02, D-52).
