@@ -24,7 +24,30 @@
       "Bash(npx prisma validate)",
       "Bash(npx prisma format)",
       "Bash(python3 -I docs/contracts/check_contracts.py)",
-      "Bash(python -I docs/contracts/check_contracts.py)"
+      "Bash(python -I docs/contracts/check_contracts.py)",
+      "PowerShell(git status *)",
+      "PowerShell(git diff *)",
+      "PowerShell(git log *)",
+      "PowerShell(git show *)",
+      "PowerShell(git add *)",
+      "PowerShell(git commit *)",
+      "PowerShell(git switch *)",
+      "PowerShell(git branch *)",
+      "PowerShell(git fetch *)",
+      "PowerShell(git pull *)",
+      "PowerShell(gh issue view *)",
+      "PowerShell(gh pr view *)",
+      "PowerShell(gh pr checks *)",
+      "PowerShell(npm test *)",
+      "PowerShell(npm run test *)",
+      "PowerShell(npm run lint *)",
+      "PowerShell(npm run build)",
+      "PowerShell(npm ci)",
+      "PowerShell(npx prisma generate)",
+      "PowerShell(npx prisma validate)",
+      "PowerShell(npx prisma format)",
+      "PowerShell(python3 -I docs/contracts/check_contracts.py)",
+      "PowerShell(python -I docs/contracts/check_contracts.py)"
     ],
     "ask": [
       "Bash(git push *)",
@@ -40,7 +63,18 @@
       "Bash(npm update *)",
       "Bash(npx prisma migrate *)",
       "Bash(npx prisma db *)",
-      "Bash(docker compose *)"
+      "Bash(docker compose *)",
+      "PowerShell(git push *)",
+      "PowerShell(gh pr create *)",
+      "PowerShell(gh pr merge *)",
+      "PowerShell(npm install *)",
+      "PowerShell(npm i *)",
+      "PowerShell(npm uninstall *)",
+      "PowerShell(npm update *)",
+      "PowerShell(npx prisma migrate *)",
+      "PowerShell(npx prisma db *)",
+      "PowerShell(docker compose *)",
+      "PowerShell(Remove-Item *)"
     ],
     "deny": [
       "Read(**/.env)",
@@ -67,7 +101,20 @@
       "Bash(docker system prune *)",
       "Bash(npx prisma migrate reset *)",
       "Bash(prisma migrate reset *)",
-      "Bash(npm publish *)"
+      "Bash(npm publish *)",
+      "PowerShell(rm -rf *)",
+      "PowerShell(git push --force *)",
+      "PowerShell(git push -f *)",
+      "PowerShell(git push --force-with-lease *)",
+      "PowerShell(git reset --hard *)",
+      "PowerShell(git clean -f*)",
+      "PowerShell(ssh *)",
+      "PowerShell(scp *)",
+      "PowerShell(aws *)",
+      "PowerShell(docker system prune *)",
+      "PowerShell(npx prisma migrate reset *)",
+      "PowerShell(prisma migrate reset *)",
+      "PowerShell(npm publish *)"
     ],
     "disableBypassPermissionsMode": "disable"
   },
@@ -83,7 +130,7 @@
         ]
       },
       {
-        "matcher": "Bash",
+        "matcher": "Bash|PowerShell",
         "hooks": [
           {
             "type": "command",
