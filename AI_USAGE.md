@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-20 (IA-35)
+> **Última actualización:** 2026-11-20 (IA-37)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -359,6 +359,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Prompt | Literal: "D03 A / D20 Recomendacion / M0 vamos a eso" |
 | Resultado | D-03 cerrada (409 `email-taken`, riesgo aceptado y mitigado); SECURITY §3, API-01, REVISION-DISENO y la trazabilidad de la API actualizadas. D-20 sigue abierta con fecha "al empezar TEC-07" |
 | Modificaciones del equipo | Lo decidió el usuario |
+| Lecciones | Ninguna nueva |
+
+### IA-37 · T-03: esqueleto del workspace y skills oficiales — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 20-11-2026 |
+| Herramienta | Claude Opus 5.5 (`claude-opus-5-5`) en claude.ai, con `gh` |
+| Prompt | Literal: "D03 A / D20 Recomendacion / M0 vamos a eso" |
+| Resultado | En este repo solo cambia la copia de APPROVED-TOOLS: 8 skills oficiales aprobadas para la app y 17 descartadas con su motivo (D-88). El esqueleto está en `hexablock-app` |
+| Modificaciones del equipo | Lo revisa el equipo en el PR |
 | Lecciones | Ninguna nueva |
 
 ## 4. Evaluación crítica
