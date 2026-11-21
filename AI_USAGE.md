@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-20 (IA-37)
+> **Última actualización:** 2026-11-20 (IA-39)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -370,6 +370,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Prompt | Literal: "D03 A / D20 Recomendacion / M0 vamos a eso" |
 | Resultado | En este repo solo cambia la copia de APPROVED-TOOLS: 8 skills oficiales aprobadas para la app y 17 descartadas con su motivo (D-88). El esqueleto está en `hexablock-app` |
 | Modificaciones del equipo | Lo revisa el equipo en el PR |
+| Lecciones | Ninguna nueva |
+
+### IA-39 · R-01 y D-89: versiones exactas y Prisma ORM 7 — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 20-11-2026 |
+| Herramienta | Claude Opus 5.5 (`claude-opus-5-5`) en claude.ai, con `gh` |
+| Prompt | Literal: "Prisma 7.10" (respuesta a la decisión sobre Prisma 7 u 8 que propuso Claude) |
+| Resultado | D-89 cerrada (Prisma ORM 7, 7.10.1) en los dos registros y en ADR-001 §2.2 (rev. 2.1). Tablas de versiones exactas en los dos README: Flutter 3.50.0 y Dart 3.14.0 (vistas en el CI), Node 26 LTS, NestJS 12.5.0, Prisma 7.10.1 y PostgreSQL 18.7 (buscadas en la web el 20-11) |
+| Modificaciones del equipo | Lo decidió el usuario |
 | Lecciones | Ninguna nueva |
 
 ## 4. Evaluación crítica
