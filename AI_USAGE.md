@@ -383,6 +383,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | Lo decidió el usuario |
 | Lecciones | Ninguna nueva |
 
+### IA-49 · Plan del setup de AWS y región `us-east-2` (D-108) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 22-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`); un subagente para leer la documentación de AWS |
+| Prompt | Literal: "Voy a hacer el setup de AWS hazme el plan y que tengo que hacer paso a paso". Después, capturas de la consola ("estoy usando el new experience de AWS"), la región asignada y "acepto la recomendacion" |
+| Resultado | Plan paso a paso de W-01 a W-06, TEC-10 y A-02, a partir de ADR-001 §2.3, SECURITY-BASELINE y los Issues. Rama `docs/aws-region` en los dos repos: D-108 en los dos `DECISIONES.md`, ADR-001 §2.3 (rev. 2.2) y el título de W-03 en `PLAN-ENTREGA.md` |
+| Modificaciones del equipo | El usuario aceptó la opción recomendada: usar la región asignada, sin activar las *advanced features* |
+| Lecciones | (1) El primer plan suponía la consola clásica (elegir `us-east-1`, usuario root y usuarios IAM). La experiencia nueva de AWS asigna la región y usa AWS Builder ID. Se detectó por la captura del usuario y se verificó en la documentación de AWS. (2) El agente no ejecuta `aws` ni `ssh` y no recibe claves (SEC-AGT-03), así que los pasos en la consola los hace una persona. (3) DuckDNS apunta el subdominio nuevo a la IP de quien lo crea, y hay que cambiarla mientras no exista la instancia |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
@@ -404,6 +415,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | La propuesta D-27 (figura en la clave del progreso) se apartaba del enunciado §5.2 | Lectura completa del enunciado (IA-07) | Dos opciones registradas en D-27 para que decida el equipo |
 | G-09 figuraba como hecha, pero la plantilla de PR no estaba en los repos | Al clonar los repos (IA-08) | Se agrega con el PR #1 |
 | PR sin la plantilla del repo y título sin ámbito | Pregunta del usuario (IA-08) | Título `docs(planning): …` y descripción con la plantilla |
+| El plan del setup de AWS suponía la consola clásica (elegir `us-east-1`, usuario root e IAM), pero la cuenta usa la experiencia nueva, que asigna la región | Captura de la consola enviada por el usuario y documentación de AWS (IA-49) | D-108: región `us-east-2`; plan ajustado a AWS Builder ID y MFA en AWS Settings |
 
 ### 4.3 Reflexión del equipo
 
