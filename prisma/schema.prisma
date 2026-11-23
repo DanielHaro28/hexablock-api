@@ -1,0 +1,77 @@
+// Data model of the server (ARQ-04-API §2). Prisma ORM 7 (D-89): the connection URL is not part of this
+// file; Migrate reads it from prisma.config.ts and the app passes a driver adapter to PrismaClient.
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/prisma/generated"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id           String        @id @default(uuid()) @db.Uuid
+  email        String        @unique @db.Citext
+  passwordHash String        @map("password_hash")
+  displayName  String        @unique @map("display_name") @db.Citext
+  role         Role          @default(USER)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamptz(3)
+  progress     Progress[]
+  bestAttempts BestAttempt[]
+
+  @@map("users")
+}
+
+model Progress {
+  userId    String   @map("user_id") @db.Uuid
+  gameId    String   @map("game_id")
+  sections  Json
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, gameId])
+  @@map("progress")
+}
+
+model BestAttempt {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  gameId     String   @map("game_id")
+  topology   String
+  levelId    String   @default("") @map("level_id")
+  stars      Int?
+  timeMs     Int?     @map("time_ms")
+  moves      Int?
+  score      Int?
+  achievedAt DateTime @map("achieved_at") @db.Timestamptz(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, gameId, topology, levelId])
+  @@index([gameId, topology, levelId])
+  @@map("best_attempts")
+}
+
+model Level {
+  id          String   @id
+  gameId      String   @map("game_id")
+  topology    String
+  order       Int
+  version     Int
+  data        Json
+  // Cursor of the level download (D-48). The column default is `nextval('levels_change_seq')` (an INSERT) and a
+  // trigger renews it on UPDATE: both are in the migration SQL because Prisma cannot assign a sequence value on
+  // UPDATE. `autoincrement()` is how Prisma reads that sequence default; never set this field from the app.
+  changeSeq   BigInt   @unique @default(autoincrement()) @map("change_seq")
+  publishedAt DateTime @default(now()) @map("published_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  @@index([gameId, topology, changeSeq])
+  @@map("levels")
+}
