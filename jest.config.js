@@ -8,6 +8,8 @@ const common = {
   preset: 'ts-jest/presets/default-esm',
   extensionsToTreatAsEsm: ['.ts'],
   testEnvironment: 'node',
+  // See the comment in that file: it works around Jest's handling of require(esm).
+  setupFilesAfterEnv: ['<rootDir>/test/support/preload.ts'],
   rootDir: '.',
   moduleNameMapper: {
     // Source files import with the `.js` extension (nodenext); Jest resolves the `.ts` file.
