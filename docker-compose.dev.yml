@@ -1,0 +1,47 @@
+# Development stack (ARQ-01-API §4): PostgreSQL, and the API built from the Dockerfile.
+# Production lives in deploy/docker-compose.yml (TEC-10) and is deployed only by CI (SEC-AGT-03).
+#
+#   cp .env.example .env            # then edit the values
+#   docker compose -f docker-compose.dev.yml up -d postgres   # database only, run the API with `npm run start:dev`
+#   docker compose -f docker-compose.dev.yml up --build       # database and API
+#
+# Variables come from `.env` (never committed). Compose refuses to start if one is missing.
+
+services:
+  postgres:
+    image: postgres:18.7-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+    ports:
+      # Host port 5433 so it does not clash with a local PostgreSQL on 5432.
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      # Inside the compose network PostgreSQL listens on 5432 under the service name.
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_EXPIRES_IN_SECONDS: ${JWT_EXPIRES_IN_SECONDS:-86400}
+      PROBLEM_BASE_URI: ${PROBLEM_BASE_URI:?set PROBLEM_BASE_URI in .env}
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  postgres-data:
