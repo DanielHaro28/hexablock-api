@@ -13,3 +13,26 @@ Exact versions used by the team, by CI and in production (R-01). Upgrading any o
 | PostgreSQL | 18.7 | `postgres:18.7-alpine` in `docker-compose.yml`, the CI service container and EC2 |
 
 The app versions (Flutter, Dart) are in the README of [hexablock-app](https://github.com/DanielHaro28/hexablock-app#versions).
+
+## Getting started
+
+Requirements: Node.js (see `.nvmrc`), npm and Docker.
+
+```bash
+cp .env.example .env                                       # then fill in the values; .env is never committed
+npm ci
+npx prisma generate                                        # creates the Prisma Client in src/prisma/generated
+docker compose -f docker-compose.dev.yml up -d postgres    # PostgreSQL on localhost:5433
+npx prisma migrate deploy                                  # applies the migrations
+npm run start:dev                                          # API on http://localhost:3000
+```
+
+| Command | What it does |
+|---|---|
+| `npm run lint` · `npm run format:check` | ESLint (includes the Clean Architecture import rules) and Prettier |
+| `npm test` | Unit tests (no database) |
+| `npm run test:integration` · `npm run test:e2e` | Tests against PostgreSQL (`DATABASE_URL` must point to a test database) |
+| `npm run test:cov` | All tests with the coverage thresholds of D-58 |
+| `npm run build` | Compiles to `dist/` |
+
+Source layout and layers: [`docs/architecture/ARQ-01-API-GENERAL.md`](docs/architecture/ARQ-01-API-GENERAL.md).

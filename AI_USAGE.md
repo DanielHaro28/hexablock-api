@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-20 (IA-39)
+> **Última actualización:** 2026-11-22 (IA-51)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -394,13 +394,23 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario aceptó la opción recomendada: usar la región asignada, sin activar las *advanced features* |
 | Lecciones | (1) El primer plan suponía la consola clásica (elegir `us-east-1`, usuario root y usuarios IAM). La experiencia nueva de AWS asigna la región y usa AWS Builder ID. Se detectó por la captura del usuario y se verificó en la documentación de AWS. (2) El agente no ejecuta `aws` ni `ssh` y no recibe claves (SEC-AGT-03), así que los pasos en la consola los hace una persona. (3) DuckDNS apunta el subdominio nuevo a la IP de quien lo crea, y hay que cambiarla mientras no exista la instancia |
 
+### IA-51 · T-04: esqueleto NestJS + Prisma + Docker — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 22-11-2026 |
+| Herramienta | Claude Code 2.1.330 con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | Paráfrasis fiel (el original es largo): el usuario pide empezar el trabajo de la API sin esperar un "procede"; revisar bien el contexto de los dos repos (instrucciones, reglas, Clean Architecture, contrato, Issues y forma de trabajar); elegir el orden de las tareas y si va todo en un PR o en varios; considerar que el motor del juego todavía no existe y si eso afecta a integrar en `main`; avisar de cualquier regla rara o inconsistencia en vez de ignorarla; y seguir buenas prácticas sin llegar a lo avanzado. Antes pidió que los commits y PR salgan solo con la cuenta de la universidad |
+| Resultado | Issue #17 (T-04): proyecto NestJS 12.5.0 en ESM con TypeScript 6; módulos `auth`, `users`, `progress`, `leaderboard`, `levels` y `health` con sus cuatro carpetas de capas; `UseCase<I, O>` (D-38); configuración validada al arrancar; `PrismaService` con el adaptador de Prisma 7.10.1; esquema y migración inicial (con `citext`, la secuencia `levels_change_seq` y su *trigger*); ESLint con las reglas de capas de ARQ-01-API §8 y la prohibición de `$queryRawUnsafe`; Jest en modo ESM con tres proyectos y los umbrales de D-58; `Dockerfile` multi-stage, `docker-compose.dev.yml` y `.env.example` |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) El esquema Prisma de ARQ-04-API era de Prisma 6: en Prisma 7 la URL de la base ya no va en `schema.prisma`. Lo detectó `prisma validate` y se adaptó (la URL pasa a `prisma.config.ts`, el cliente usa un adaptador). (2) La regla de ESLint "un módulo no importa la infraestructura de otro" no se disparaba, porque los imports relativos no llevan `modules/` en la ruta. Lo detectó una prueba con archivos de muestra que debían fallar. (3) `npm audit` marcó un *high* en `effect` (dependencia del CLI de Prisma); se resolvió con un `override` a una versión parcheada de la misma versión mayor. (4) La plantilla oficial de Nest 12 trae Vitest y oxlint, pero el proyecto decidió Jest y ESLint; se siguió lo decidido y se dejó anotada la diferencia. (5) Los umbrales de cobertura por capa hacen fallar a Jest mientras la capa no tiene código; ahora se activan solos cuando aparece. (6) Mutación manual: bajar el mínimo del secreto JWT a 8 bytes hizo fallar una prueba, lo que confirma que la prueba protege la regla. (7) El `Dockerfile` y `docker-compose.dev.yml` **no se pudieron probar de punta a punta**: el disco `C:` de la máquina quedó lleno y Docker Desktop pasó a solo lectura durante la construcción de la imagen. Solo se verificó que PostgreSQL 18.7 con la migración funciona (7 pruebas de integración). Queda pendiente construir la imagen y arrancar la API en contenedor |
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | 0 %: todavía no hay código |
+| Código del backend | Esqueleto (T-04, IA-51): escrito con Claude Code y pendiente de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
@@ -416,6 +426,8 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | G-09 figuraba como hecha, pero la plantilla de PR no estaba en los repos | Al clonar los repos (IA-08) | Se agrega con el PR #1 |
 | PR sin la plantilla del repo y título sin ámbito | Pregunta del usuario (IA-08) | Título `docs(planning): …` y descripción con la plantilla |
 | El plan del setup de AWS suponía la consola clásica (elegir `us-east-1`, usuario root e IAM), pero la cuenta usa la experiencia nueva, que asigna la región | Captura de la consola enviada por el usuario y documentación de AWS (IA-49) | D-108: región `us-east-2`; plan ajustado a AWS Builder ID y MFA en AWS Settings |
+| El esquema Prisma de ARQ-04-API (`url = env(...)` en el `datasource`) no es válido en Prisma ORM 7, la versión elegida en D-89 | `prisma validate` al crear el esquema (IA-51) | La URL pasa a `prisma.config.ts`; el esquema y la nota de ARQ-04-API §2 quedan alineados con Prisma 7 |
+| Regla de ESLint "un módulo no importa la infraestructura de otro" con un patrón que nunca coincidía (los imports relativos no llevan `modules/`) | Archivos de muestra que debían fallar y no fallaban (IA-51) | Patrón `**/<módulo>/infrastructure/**`, comprobado con un import cruzado y con uno del propio módulo |
 
 ### 4.3 Reflexión del equipo
 
