@@ -30,10 +30,16 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json prisma.config.ts ./
 COPY prisma ./prisma
+# Swagger in /docs is generated from the contract at runtime (TEC-05), so the contract travels with the code.
+COPY docs/contracts ./docs/contracts
 
 # The process does not run as root.
 USER node
 EXPOSE 3000
+
+# `GET /health` answers 200 only when the API and the database do (RF-92). Node has fetch, so no extra tool.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:' + (process.env.PORT || 3000) + '/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
 
 # Apply the migrations, then start the API. `exec` makes Node PID 1 so it receives SIGTERM (shutdown hooks).
 CMD ["sh", "-c", "npx --no-install prisma migrate deploy && exec node dist/main.js"]
