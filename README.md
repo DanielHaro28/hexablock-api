@@ -27,11 +27,14 @@ npx prisma migrate deploy                                  # applies the migrati
 npm run start:dev                                          # API on http://localhost:3000
 ```
 
+Once it runs: `GET /health` (API and database) and the Swagger UI in `/docs`, generated from [`docs/contracts/openapi.yaml`](docs/contracts/openapi.yaml). Every error is Problem Details (RFC 9457) with a `code`.
+
 | Command | What it does |
 |---|---|
 | `npm run lint` · `npm run format:check` | ESLint (includes the Clean Architecture import rules) and Prettier |
 | `npm test` | Unit tests (no database) |
-| `npm run test:integration` · `npm run test:e2e` | Tests against PostgreSQL (`DATABASE_URL` must point to a test database) |
+| `npm run test:e2e` | HTTP tests of the whole application with the real global pipeline; responses are checked against `openapi.yaml`. They use fakes for the database when they can |
+| `npm run test:integration` | Tests against a real PostgreSQL (`DATABASE_URL` must point to a test database that has the migrations) |
 | `npm run test:cov` | All tests with the coverage thresholds of D-58 |
 | `npm run build` | Compiles to `dist/` |
 

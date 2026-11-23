@@ -40,9 +40,9 @@
 | RF-80 | LVL-01 | RN-COM-70, 72, 75 | — | |
 | RF-81 | LVL-02 | RN-COM-70, 71, SEC-API-05 | — | |
 | RF-82 | LVL-02 | RN-COM-71, 76, RN-HF-12 (a–e, g), RN-HS-12 | E-HF-NIVEL (y sus variaciones a y d) | |
-| RF-90 | TEC-05 | — | — | |
-| RF-91 | TEC-05 | SEC-API-08 | — | |
-| RF-92 | TEC-05, TEC-10 | — | — | |
+| RF-90 | TEC-05 | D-23 | — | `test/e2e/health-and-docs.spec.ts`, `test/unit/common/openapi/openapi-document.spec.ts` |
+| RF-91 | TEC-05 | D-51, SEC-API-03, 04, 08, SEC-WEB-07 | — | `test/unit/common/presentation/*.spec.ts`, `test/e2e/pipeline.spec.ts`, `test/e2e/throttling.spec.ts` |
+| RF-92 | TEC-05, TEC-10 | — | — | `test/unit/modules/health/check-health.use-case.spec.ts`, `test/integration/health/prisma-health-probe.spec.ts`, `test/e2e/health-and-docs.spec.ts` |
 | RF-93 | API-03 | RN-COM-108, SEC-API-06 | — | |
 
 **Historias sin RF (solo RNF):** TEC-04 (RNF-24 a 26), TEC-10 (RNF-32, 36).

@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-22 (IA-51)
+> **Última actualización:** 2026-11-22 (IA-52)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -404,6 +404,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Resultado | Issue #17 (T-04): proyecto NestJS 12.5.0 en ESM con TypeScript 6; módulos `auth`, `users`, `progress`, `leaderboard`, `levels` y `health` con sus cuatro carpetas de capas; `UseCase<I, O>` (D-38); configuración validada al arrancar; `PrismaService` con el adaptador de Prisma 7.10.1; esquema y migración inicial (con `citext`, la secuencia `levels_change_seq` y su *trigger*); ESLint con las reglas de capas de ARQ-01-API §8 y la prohibición de `$queryRawUnsafe`; Jest en modo ESM con tres proyectos y los umbrales de D-58; `Dockerfile` multi-stage, `docker-compose.dev.yml` y `.env.example` |
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) El esquema Prisma de ARQ-04-API era de Prisma 6: en Prisma 7 la URL de la base ya no va en `schema.prisma`. Lo detectó `prisma validate` y se adaptó (la URL pasa a `prisma.config.ts`, el cliente usa un adaptador). (2) La regla de ESLint "un módulo no importa la infraestructura de otro" no se disparaba, porque los imports relativos no llevan `modules/` en la ruta. Lo detectó una prueba con archivos de muestra que debían fallar. (3) `npm audit` marcó un *high* en `effect` (dependencia del CLI de Prisma); se resolvió con un `override` a una versión parcheada de la misma versión mayor. (4) La plantilla oficial de Nest 12 trae Vitest y oxlint, pero el proyecto decidió Jest y ESLint; se siguió lo decidido y se dejó anotada la diferencia. (5) Los umbrales de cobertura por capa hacen fallar a Jest mientras la capa no tiene código; ahora se activan solos cuando aparece. (6) Mutación manual: bajar el mínimo del secreto JWT a 8 bytes hizo fallar una prueba, lo que confirma que la prueba protege la regla. (7) El `Dockerfile` y `docker-compose.dev.yml` **no se pudieron probar de punta a punta**: el disco `C:` de la máquina quedó lleno y Docker Desktop pasó a solo lectura durante la construcción de la imagen. Solo se verificó que PostgreSQL 18.7 con la migración funciona (7 pruebas de integración). Queda pendiente construir la imagen y arrancar la API en contenedor |
+### IA-52 · TEC-05: errores Problem Details, salud, Swagger y endurecimiento HTTP — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 22-11-2026 |
+| Herramienta | Claude Code 2.1.330 con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | El mismo pedido de IA-51 (avanzar sin esperar un "procede", siguiendo las reglas del proyecto y avisando de lo que parezca raro), aplicado al Issue #15. La IA eligió el orden: TEC-05 va antes que las historias porque todas necesitan el filtro de errores |
+| Resultado | Issue #15 (TEC-05): jerarquía `DomainError` y catálogo de problemas (D-51); `GlobalExceptionFilter` que atrapa también los errores del framework; identificador de correlación y registro de accesos sin cuerpos (SEC-WEB-06); `ValidationPipe` con *whitelist* y errores con JSON Pointer; helmet, límite de 100 KB y *throttler* con `Retry-After`; `GET /health` por capas; Swagger en `/docs` generado desde `openapi.yaml`; verificador de respuestas contra el contrato en las pruebas |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) La IA supuso que Nest dejaba pasar el `type` del error de `body-parser` y programó un código `malformed-json`; en realidad Nest convierte el `SyntaxError` en `BadRequestException`. Lo detectó una prueba e2e y se eliminó esa rama muerta. (2) `@nestjs/throttler` es CommonJS y `@nestjs/common` 12 es ESM: Jest falla con "require(esm) in a cycle" aunque Node real funciona. Se resolvió precargando ambos antes de las pruebas (`test/support/preload.ts`), y se comprobó con un arranque real de `node dist/main.js`. (3) Las rutas POST de Nest devuelven 201 por defecto; las rutas de prueba que imitan el login tuvieron que fijar 200 como dice el contrato. (4) El *throttler* pone `Retry-After-<nombre>` para los límites con nombre, y el contrato pide `Retry-After`: se sobrescribió el guard. (5) Los esquemas del contrato usan un `$id` absoluto de un dominio de ejemplo, y el lector de referencias intentaba descargarlos: se añadió un resolvedor que lee solo `docs/contracts/`. (6) Comprobación de mutación sobre tres controles (quitar `forbidNonWhitelisted`, helmet y `Retry-After`): las pruebas fallaron en los tres casos. (7) La prueba de `PrismaHealthProbe` con la base disponible no se pudo ejecutar porque Docker quedó sin disco; sí se probó la mitad "base inalcanzable" y el arranque real de la API sin base (`/health` responde 503) |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
@@ -428,6 +439,8 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | El plan del setup de AWS suponía la consola clásica (elegir `us-east-1`, usuario root e IAM), pero la cuenta usa la experiencia nueva, que asigna la región | Captura de la consola enviada por el usuario y documentación de AWS (IA-49) | D-108: región `us-east-2`; plan ajustado a AWS Builder ID y MFA en AWS Settings |
 | El esquema Prisma de ARQ-04-API (`url = env(...)` en el `datasource`) no es válido en Prisma ORM 7, la versión elegida en D-89 | `prisma validate` al crear el esquema (IA-51) | La URL pasa a `prisma.config.ts`; el esquema y la nota de ARQ-04-API §2 quedan alineados con Prisma 7 |
 | Regla de ESLint "un módulo no importa la infraestructura de otro" con un patrón que nunca coincidía (los imports relativos no llevan `modules/`) | Archivos de muestra que debían fallar y no fallaban (IA-51) | Patrón `**/<módulo>/infrastructure/**`, comprobado con un import cruzado y con uno del propio módulo |
+| Código `malformed-json` para el JSON mal formado, basado en un dato de `body-parser` que Nest descarta al convertir el error | Prueba e2e con un cuerpo roto (IA-52) | Se eliminó la rama; el error usa `invalid-request` con puntero vacío |
+| Rutas de prueba POST sin `@HttpCode(200)`, aunque el contrato del login dice 200 | Prueba e2e que esperaba 200 (IA-52) | `@HttpCode(200)` en las rutas de prueba |
 
 ### 4.3 Reflexión del equipo
 
