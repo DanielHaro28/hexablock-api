@@ -482,6 +482,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario decidió el reparto. Preguntó si la cuenta era de la app; Claude explicó que API-03 tiene su mitad del servidor (de @DavidCR20) y API-07 es solo de la app, y propuso API-03 para el usuario y API-07 para @dicpc; el usuario se quedó con los dos. Claude agregó a `CODEOWNERS` las carpetas de cada variante y pasó a @DanielHaro28 la persistencia del progreso, que tenía @DavidCR20 desde D-62 |
 | Lecciones | (1) `issues_created.json` estaba desactualizado: Hexa Lines figuraba sin responsable aunque en GitHub estaba asignado desde el 22-11, y T-08 no estaba en el archivo y tampoco tenía responsable en GitHub, aunque el plan lo nombraba. (2) `assign_pending.py` recorre los 87 Issues y no terminó en 5 minutos con la API lenta; se asignaron directamente solo los que cambiaban. (3) Un corte de conexión hizo que el script que editaba los cuerpos leyera un cuerpo vacío y lo escribiera así en #52 (HM-04); se detectó al verificar los 26 Issues después de editarlos y se restauró desde el historial de ediciones de GitHub. Un script que reescribe datos remotos tiene que negarse a escribir si lo que leyó no tiene la forma esperada |
 
+### IA-68 · Merge de `main` en vez de rebase en los PR apilados (precisión de D-137) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 24-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`) |
+| Prompt | Literal: "Mergea el #127 y haz el rebase del #128"; ante el bloqueo del *force push*, eligió "Merge de main" entre las opciones; después: "sí, haz el paired-change de D-137" |
+| Resultado | Se integró app #127 (la primera parte de HL-02) con *squash* y sin borrar la rama. El rebase de app #128 no se pudo subir: el *hook* de git bloquea el *force push* (SEC-AGT-02). Claude integró `main` en la rama de #128 con un merge (sus dos conflictos venían del *squash* de #127; se tomó la versión de la rama y se comprobó que el árbol no cambiaba), la subió sin *force* y cambió su base a `main`. Después, D-137 en `docs/DECISIONES.md` de los dos repos, con el mismo texto: la rama del siguiente PR apilado integra `main` con un merge en lugar de rebasarse, con el motivo y qué hacer ante un conflicto con el *squash* anterior. Sin Issue (precisa una decisión cerrada) |
+| Modificaciones del equipo | El usuario eligió el merge de `main` entre las tres opciones de Claude (merge, rama y PR nuevos, o que el usuario hiciera el *force push* a mano) y pidió precisar D-137 en los dos repos. Claude lo escribió como precisión de D-137 y no como una decisión nueva, para no reabrirla |
+| Lecciones | (1) D-137 se escribió (IA-63) con un paso que su propia configuración de seguridad prohíbe: ninguna revisión cruzó la decisión con los *hooks*, y apareció la primera vez que se integró un PR apilado. (2) El sistema de permisos rechazó un `git reset --hard` para descartar el rebase local; se hizo el merge en una rama local nueva desde la versión remota y se subió como avance normal, sin borrar nada. La rama local rebasada quedó desalineada y se dejó para que el usuario decida |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
@@ -509,6 +520,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | `/ai-usage` nueva editó `shuffle.dart` y dejó pendiente el número de PR | Evaluación con `skill-creator`, primera iteración (IA-57) | Solo cambia `AI_USAGE.md` y usa el Issue; la segunda iteración lo confirmó |
 | `next_id.py` contaba como usados los IDs de ejemplo de su comentario y de una skill | Corriendo el script sobre los repos reales (IA-57) | Solo cuenta Markdown fuera de `.claude/`, con una prueba por caso |
 | Al editar en lote los cuerpos de 26 Issues, un corte de conexión dejó vacío el de #52 (HM-04): el script escribía aunque la lectura hubiera fallado (IA-65) | Verificación posterior del largo y del responsable de cada Issue | Texto restaurado desde el historial de ediciones de GitHub (GraphQL `userContentEdits`); los reintentos se negaban a escribir un cuerpo sin la forma esperada |
+| D-137 pedía rebasar la rama del siguiente PR apilado, lo que exige un *force push* que SEC-AGT-02 prohíbe (IA-63, IA-68) | El *hook* de git bloqueó el *force push* al integrar la primera parte de HL-02 | Precisión de D-137 en los dos repos: merge de `main` en vez de rebase |
 
 ### 4.3 Reflexión del equipo
 
