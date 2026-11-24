@@ -449,6 +449,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario decidió reducir la lista y dejar el resto para si sobra tiempo. ⚠️ completar con lo que ajuste quien revise el agente y la skill |
 | Lecciones | (1) Evaluar cada skill con línea base y dos iteraciones consumió la mayor parte de la conversación: las evaluaciones convienen cuando corrigen un error que ya pasó, como el ID repetido de `/ai-usage`. (2) Varias de las skills planeadas ya las cubren herramientas existentes (`/code-review` de Claude Code y los dos revisores del proyecto) |
 
+### IA-63 · División de historias grandes en PR apilados (D-137) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 24-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`) |
+| Prompt | Literal: "Pregunta relaciona Es normal meter tantos commits en un solo PR o seria mejor hacer varios PR con menos commits ya que estoy viendo que son muchos cambios no?". Después: "agregaa la propuesta a desiciones con la desicion que se divide PR apilados con subtareas del issue" |
+| Resultado | D-137 en `docs/DECISIONES.md` de los dos repos, con el mismo texto: una historia o tarea de más de unas 8 h, o de más de unas 600 líneas previstas, lleva subtareas en su Issue y cada una va en su propio PR, apilado sobre el anterior; cómo se rebasa e integra cada uno, y que solo el último cierra el Issue. Sin Issue (una decisión del flujo de trabajo) |
+| Modificaciones del equipo | Claude explicó que la cantidad de commits no era el problema (se integra con *squash*), sino el tamaño del PR de TEC-11 (unas 3.000 líneas), y propuso dividir las historias grandes en PR apilados. El usuario la tomó como decisión cerrada y eligió que las partes sean subtareas del mismo Issue en lugar de Issues nuevos. Los umbrales de 8 h y 600 líneas son la propuesta de Claude, aceptada sin cambios |
+| Lecciones | (1) La regla "un Issue por PR" ataba el tamaño de un PR al de su Issue; el problema apareció recién con el primer PR grande (#123). (2) La línea de CLAUDE.md que dice "Un Issue por PR" queda desactualizada hasta que se cambie; es configuración del agente (SEC-AGT-05) y no se tocó sin el visto bueno del usuario |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
