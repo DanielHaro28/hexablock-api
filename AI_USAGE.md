@@ -394,6 +394,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario aceptó la opción recomendada: usar la región asignada, sin activar las *advanced features* |
 | Lecciones | (1) El primer plan suponía la consola clásica (elegir `us-east-1`, usuario root y usuarios IAM). La experiencia nueva de AWS asigna la región y usa AWS Builder ID. Se detectó por la captura del usuario y se verificó en la documentación de AWS. (2) El agente no ejecuta `aws` ni `ssh` y no recibe claves (SEC-AGT-03), así que los pasos en la consola los hace una persona. (3) DuckDNS apunta el subdominio nuevo a la IP de quien lo crea, y hay que cambiarla mientras no exista la instancia |
 
+### IA-56 · Skills de revisión de código y aprobación de `skill-creator` (D-126) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 23-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`) |
+| Prompt | Paráfrasis fiel: el usuario preguntó si se podía hacer una skill de revisión de código después de implementar y otra que revise los PR, que hicieran su trabajo lo mejor posible, y pidió opciones. Después pidió revisar que el código no tuviera castings, valores fijos ni dependencia de una geometría particular, y también todo el código implementado hasta ese momento. Preguntó si había un plugin para hacer skills, y pidió: "registra la P-xx con la opción A". Por último: "por que en pendiente? si es una desicion y haz el commit mas PR" |
+| Resultado | Cuatro opciones para las skills de revisión (ligera, coordinada con verificación, sobre `/code-review`, en el CI), con la coordinada como recomendada. Qué cubren hoy `analysis_options.yaml` y `tool/check_architecture.dart` y qué falta para castings, valores fijos y geometría. Dos opciones para `skill-creator`. D-126 cerrada en `DECISIONES.md` de los dos repos y la sección "Ayudas para crear skills" en `docs/ai/APPROVED-TOOLS.md` (compartido), en dos PR enlazados. Revisión de las skills existentes con los criterios de `skill-creator` y lista ordenada de 15 skills y agentes, con D-127 cerrada y D-128 (horas en el tablero) abierta. Las skills todavía no se escriben |
+| Modificaciones del equipo | El usuario eligió la opción A y cerró la decisión directamente, sin dejarla abierta en `PENDIENTES.md`. Confirmó las recomendaciones de D-127 y corrigió el lugar de los casos de prueba (en el repo y no fuera, como decía la primera versión de D-126) |
+| Lecciones | (1) Claude llamó `P-xx` a la decisión, pero en este proyecto `P-*` son las preguntas al profesor; se registró como `D-126`. (2) Claude la dejó abierta en `PENDIENTES.md` aunque el usuario ya la había decidido; el usuario lo corrigió y se pasó a `DECISIONES.md`. (3) La rama de TEC-01, que todavía no se integra, ya usa la decisión y la entrada de este archivo que siguen a las de `main`: para no reutilizar IDs se revisaron todas las ramas de los dos repos, no solo `main`. (4) Una búsqueda rápida de `is` en el motor encontró 9 casos, todos dentro de `operator ==`: una regla que solo busque el patrón daría falsos positivos, y por eso la propuesta combina la herramienta con un revisor que tenga criterio |
+
 ### IA-57 · `/ai-usage` sin IDs repetidos: `next_id.py` y evaluaciones con `skill-creator` — compartido
 
 | Campo | Contenido |
@@ -427,6 +438,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | G-09 figuraba como hecha, pero la plantilla de PR no estaba en los repos | Al clonar los repos (IA-08) | Se agrega con el PR #1 |
 | PR sin la plantilla del repo y título sin ámbito | Pregunta del usuario (IA-08) | Título `docs(planning): …` y descripción con la plantilla |
 | El plan del setup de AWS suponía la consola clásica (elegir `us-east-1`, usuario root e IAM), pero la cuenta usa la experiencia nueva, que asigna la región | Captura de la consola enviada por el usuario y documentación de AWS (IA-49) | D-108: región `us-east-2`; plan ajustado a AWS Builder ID y MFA en AWS Settings |
+| Llamó `P-xx` a una decisión nueva (D-126); en el proyecto `P-*` son las preguntas al profesor, y además la dejó abierta en `PENDIENTES.md` aunque el usuario ya la había decidido | El usuario (IA-56) | Se registró como D-126 y se cerró en `DECISIONES.md` |
 | `/ai-usage` nueva editó `shuffle.dart` y dejó pendiente el número de PR | Evaluación con `skill-creator`, primera iteración (IA-57) | Solo cambia `AI_USAGE.md` y usa el Issue; la segunda iteración lo confirmó |
 | `next_id.py` contaba como usados los IDs de ejemplo de su comentario y de una skill | Corriendo el script sobre los repos reales (IA-57) | Solo cuenta Markdown fuera de `.claude/`, con una prueba por caso |
 
