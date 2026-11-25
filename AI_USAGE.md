@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-25 (IA-80)
+> **Última actualización:** 2026-11-25 (IA-81)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -559,13 +559,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) La tercera variación de E-HF-NIVEL en `02-RN-NIVELES` §4 ("A ocupa `{(0,0),(1,0),(2,0)}`, pasa (a)–(e) en el backend") no se cumple tal como está escrita: esas celdas se solapan con la solución de B y falla (d). Para probar lo que quiere decir (pasa en el backend y falla (f) en la app) la prueba también mueve B a las celdas que quedan. (2) El documento de topologías (`02-RN-TOPOLOGIAS`) solo está en el repo de la app, pero el validador de la API necesita sus anexos (vecinas, tablero por defecto): se leyeron de ahí. (3) Comprobación de mutación sobre tres reglas: permitir el solape, quitar la regla de movimientos y quitar la conectividad hicieron fallar 1, 2 y 2 pruebas |
 
+### IA-81 · LVL-02 (parte 2): reglas estructurales de Hexa Sort y tableros por defecto — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #13 (LVL-02), segunda de tres partes apiladas (D-137): `defaultSortBoard` para las cuatro topologías (RN-TOP-11) y `checkSortStructure` con RN-HS-12 (generación coherente, pilas dentro del tablero, colores de la paleta, bloque de cima de menos de 10 fichas y al menos una celda vacía), con las celdas de la topología y las repetidas; pruebas con los niveles de ejemplo del contrato |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) Los documentos no dicen dónde empiezan los tableros por defecto de cuadrados y cubos (RN-TOP-11 solo da el tamaño): se tomó el origen en `(0,0)` y `(0,0,0)` y se dejó escrito en el código, para que un nivel que necesite otras celdas declare su propio `board`. Solo afecta a niveles de Hexa Sort con pilas iniciales fuera de hexágonos, que hoy no existen. (2) "Parámetros de generación coherentes" (RN-HS-12) no dice qué es coherente: el esquema ya acota las alturas y los bloques, y solo falta que la altura mínima no supere a la máxima. (3) "Bloque de cima de 10 o más" se entendió como las fichas seguidas del mismo color al final de la pila, no como cualquier bloque de la pila. (4) Comprobación de mutación sobre tres reglas: subir el límite de la cima, quitar la paleta y quitar la celda vacía hicieron fallar 1, 2 y 1 pruebas |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79) y reglas de Hexa Fit (LVL-02, IA-80): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80) y de Hexa Sort (LVL-02, IA-81): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
