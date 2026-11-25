@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-24 (IA-77)
+> **Última actualización:** 2026-11-24 (IA-78)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -526,13 +526,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) La lista de contraseñas comunes de la NCSC tiene entradas que son volcados hexadecimales de otro texto (`$HEX[...]`): se filtraron. (2) Con el mínimo de 15 caracteres casi todas las contraseñas comunes ya salen como `too-short`, y solo 327 de las 100 000 de la lista tienen 15 o más; ampliar la cobertura (por ejemplo, rechazar una palabra común repetida) es una decisión del equipo. (3) Comprobación de mutación: quitar `toLowerCase()` del correo hizo fallar 2 pruebas y desactivar la política de contraseñas hizo fallar 8. (4) Las pruebas de integración y e2e de registro necesitan PostgreSQL, así que `npm run test:e2e` ya no corre sin `DATABASE_URL`. (5) Las imágenes `alpine` de Docker necesitan la versión *musl* de `argon2`: el paquete la trae, pero la imagen Docker no se pudo construir en esta máquina, así que sigue sin probarse |
 
+### IA-78 · API-02: inicio de sesión y guard de JWT (`POST /v1/auth/login`) — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 24-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #9 (API-02): `LoginUseCase` (mismo error y mismo trabajo con un correo inexistente que con una contraseña errónea, comparando contra un hash que no es de nadie), `verify` en `Argon2PasswordHasher`, `findCredentialsByEmail` en `PrismaUserRepository`, `JwtTokenVerifier` (HS256 fijo), `JwtAuthGuard` global con denegación por defecto y `@Public()` solo en registro, login y salud, `@CurrentUser()`, `LoginDto` y la ruta; pruebas unitarias, de integración y e2e contra `openapi.yaml`, y las rutas de prueba de los e2e adaptadas (la ruta falsa de login se sustituyó por la real) |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) Comprobación de mutación sobre tres controles: un guard que deja pasar todo hizo fallar 12 pruebas, aceptar también HS512 hizo fallar 1 y saltarse el hash de relleno del login hizo fallar 1. (2) El guard va después del límite de peticiones (`APP_GUARD` en ese orden), para que las peticiones sin token también cuenten. (3) Una petición sin cabecera `Authorization` es un 401 sin más, y una con otro esquema o un token inservible dice `invalid_token` (RFC 6750 §3); la respuesta nunca dice por qué falló el token. (4) Con la denegación por defecto, las rutas de prueba de `TEC-05` tuvieron que marcarse `@Public()`. (5) La igualdad de tiempo entre "correo inexistente" y "contraseña errónea" se prueba contando las comprobaciones de hash, no midiendo tiempo, porque una medición real sería inestable en CI |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76) y registro (API-01, IA-77): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77) e inicio de sesión (API-02, IA-78): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
