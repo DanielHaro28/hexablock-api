@@ -15,6 +15,12 @@ export interface AppConfig {
   readonly jwtExpiresInSeconds: number;
   /** Public base URI of the problem types: `type` = this + `code` (D-51). */
   readonly problemBaseUri: string;
+  /** Requests per minute and IP on every route (SEC-API-04). */
+  readonly throttleLimit: number;
+  /** Requests per minute and IP on `/v1/auth/*`, the strictest limit (SEC-API-04). */
+  readonly throttleAuthLimit: number;
+  /** Reverse proxies in front of the API (Caddy = 1), so the client IP is read from X-Forwarded-For. 0 = none. */
+  readonly trustProxyHops: number;
 }
 
 export const MIN_JWT_SECRET_BYTES = 32;
@@ -83,6 +89,10 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): A
     problems.push('PROBLEM_BASE_URI: must look like https://<public host>/problems/');
   }
 
+  const throttleLimit = integer('THROTTLE_LIMIT', 100, 1, 10_000);
+  const throttleAuthLimit = integer('THROTTLE_AUTH_LIMIT', 5, 1, 1_000);
+  const trustProxyHops = integer('TRUST_PROXY_HOPS', 0, 0, 5);
+
   if (problems.length > 0) throw new ConfigError(problems);
 
   return {
@@ -92,5 +102,8 @@ export function loadConfig(env: Readonly<Record<string, string | undefined>>): A
     jwtSecret,
     jwtExpiresInSeconds,
     problemBaseUri,
+    throttleLimit,
+    throttleAuthLimit,
+    trustProxyHops,
   };
 }

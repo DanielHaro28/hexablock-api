@@ -40,7 +40,43 @@ describe('SEC-API-02 · configuration validated at startup (ARQ-01-API §7)', ()
       jwtSecret: SECRET,
       jwtExpiresInSeconds: 3600,
       problemBaseUri: 'https://hexablock-api.example/problems/',
+      throttleLimit: 100,
+      throttleAuthLimit: 5,
+      trustProxyHops: 0,
     });
+  });
+
+  it('should_read_the_throttling_and_proxy_settings_when_they_are_set', () => {
+    // Arrange
+    const env = {
+      ...validEnv(),
+      THROTTLE_LIMIT: '20',
+      THROTTLE_AUTH_LIMIT: '2',
+      TRUST_PROXY_HOPS: '1',
+    };
+
+    // Act
+    const config = loadConfig(env);
+
+    // Assert
+    expect(config.throttleLimit).toBe(20);
+    expect(config.throttleAuthLimit).toBe(2);
+    expect(config.trustProxyHops).toBe(1);
+  });
+
+  it.each([
+    ['THROTTLE_LIMIT', '0', 'must be an integer from 1 to 10000'],
+    ['THROTTLE_AUTH_LIMIT', 'many', 'must be an integer from 1 to 1000'],
+    ['TRUST_PROXY_HOPS', '-1', 'must be an integer from 0 to 5'],
+  ])('should_fail_when_%s_is_%s', (name, value, reason) => {
+    // Arrange
+    const env = { ...validEnv(), [name]: value };
+
+    // Act
+    const problems = problemsOf(env);
+
+    // Assert
+    expect(problems).toEqual([`${name}: ${reason}`]);
   });
 
   it('should_use_the_defaults_when_optional_variables_are_missing', () => {
