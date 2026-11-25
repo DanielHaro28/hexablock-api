@@ -38,7 +38,7 @@ export async function configureApp(app: NestExpressApplication, config: AppConfi
   app.use(correlationIdMiddleware);
   app.use(accessLogMiddleware(new Logger('Access')));
   app.use((req: Request, res: Response, next: NextFunction) =>
-    (req.path.startsWith('/docs') ? docsHelmet : apiHelmet)(req, res, next),
+    (req.path.toLowerCase().startsWith('/docs') ? docsHelmet : apiHelmet)(req, res, next),
   );
   app.useBodyParser('json', { limit: MAX_BODY_SIZE });
 

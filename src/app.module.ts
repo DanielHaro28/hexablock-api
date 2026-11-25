@@ -32,8 +32,14 @@ const ONE_MINUTE_MS = 60_000;
             name: 'auth',
             ttl: ONE_MINUTE_MS,
             limit: config.throttleAuthLimit,
+            // Express matches routes without case (`POST /V1/AUTH/login` reaches login), so the path is compared
+            // in lower case. Otherwise a change of case would skip the strict limit (SEC-API-04).
             skipIf: (context) =>
-              !context.switchToHttp().getRequest<Request>().path.startsWith('/v1/auth/'),
+              !context
+                .switchToHttp()
+                .getRequest<Request>()
+                .path.toLowerCase()
+                .startsWith('/v1/auth/'),
           },
         ],
       }),

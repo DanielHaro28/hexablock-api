@@ -59,6 +59,33 @@ describe('SEC-API-04 · rate limiting by IP (limits are low in the test, tests.m
     });
   });
 
+  describe('the strict limit when the path changes case', () => {
+    let app: NestExpressApplication;
+
+    beforeAll(async () => {
+      app = await createTestApp({ env: { THROTTLE_AUTH_LIMIT: '2', THROTTLE_LIMIT: '1000' } });
+    });
+
+    afterAll(async () => {
+      await app.close();
+    });
+
+    it('should_apply_the_auth_limit_when_the_path_changes_case', async () => {
+      // Arrange: Express routes `/V1/AUTH/login` to login; the global limit is 1000, so only the strict limit
+      // (2 per minute) can answer 429 here.
+      const server = app.getHttpServer();
+      const statuses: number[] = [];
+
+      // Act
+      for (let attempt = 0; attempt < 3; attempt++) {
+        statuses.push((await request(server).post('/V1/AUTH/login').send({})).status);
+      }
+
+      // Assert
+      expect(statuses).toEqual([200, 200, 429]);
+    });
+  });
+
   describe('the global limit', () => {
     let app: NestExpressApplication;
 
