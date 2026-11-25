@@ -12,6 +12,7 @@ import {
 import { Public } from '../../src/common/presentation/public.js';
 import type { AuthenticatedUser } from '../../src/modules/auth/application/token-verifier.js';
 import { CurrentUser } from '../../src/modules/auth/presentation/current-user.decorator.js';
+import { Roles } from '../../src/modules/auth/presentation/roles.decorator.js';
 
 export class EchoDto {
   @IsString()
@@ -93,5 +94,11 @@ export class PrivateProbeController {
   @Get('me')
   me(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser {
     return user;
+  }
+
+  @Roles('ADMIN')
+  @Get('admin')
+  admin(): { ok: true } {
+    return { ok: true };
   }
 }
