@@ -90,6 +90,9 @@ function mapHttpStatus(status: number, exception: unknown): MappedException {
       };
     default:
       if (status >= 500) return { code: 'internal-error', headers: {}, unexpected: exception };
+      // On purpose: the contract defines 15 `code` values and none fits a 405, 406 or 415, so any other 4xx is a
+      // `400 validation-failed` over the whole body. A route that can answer one of them (there is none yet)
+      // would need a new `code` in the contract, decided with the team.
       return {
         code: 'validation-failed',
         errors: WHOLE_BODY,
