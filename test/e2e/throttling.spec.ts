@@ -71,7 +71,7 @@ describe('SEC-API-04 · rate limiting by IP (limits are low in the test, tests.m
     });
 
     it('should_apply_the_auth_limit_when_the_path_changes_case', async () => {
-      // Arrange: Express routes `/V1/AUTH/login` to login; the global limit is 1000, so only the strict limit
+      // Arrange: Express routes `/V1/AUTH/login` to login (a 400 here: the body is empty); the global limit is 1000, so only the strict limit
       // (2 per minute) can answer 429 here.
       const server = app.getHttpServer();
       const statuses: number[] = [];
@@ -82,7 +82,7 @@ describe('SEC-API-04 · rate limiting by IP (limits are low in the test, tests.m
       }
 
       // Assert
-      expect(statuses).toEqual([200, 200, 429]);
+      expect(statuses).toEqual([400, 400, 429]);
     });
   });
 

@@ -9,6 +9,9 @@ import {
   NotFoundError,
   UnauthorizedError,
 } from '../../src/common/domain/domain-error.js';
+import { Public } from '../../src/common/presentation/public.js';
+import type { AuthenticatedUser } from '../../src/modules/auth/application/token-verifier.js';
+import { CurrentUser } from '../../src/modules/auth/presentation/current-user.decorator.js';
 
 export class EchoDto {
   @IsString()
@@ -24,8 +27,9 @@ export class EchoDto {
 
 /**
  * Routes that exist only in the tests, to exercise the global pipeline (filter, pipe, headers) before the
- * real controllers arrive. They are not part of the application.
+ * real controllers arrive. They are not part of the application. They are public: the guard denies by default.
  */
+@Public()
 @Controller('__probe')
 export class ProbeController {
   @Post('echo')
@@ -80,12 +84,14 @@ export class ProbeController {
   }
 }
 
-/** Stands in for login and register to test the stricter limit of `/v1/auth/*`. */
-@Controller('v1/auth')
-export class FakeAuthController {
-  @Post('login')
-  @HttpCode(200)
-  login(): { ok: true } {
-    return { ok: true };
+/**
+ * A route that is not marked `@Public()`, like every route of the application except register, login and
+ * health: it answers who the guard says is calling, and nothing else (SEC-API-01).
+ */
+@Controller('__private')
+export class PrivateProbeController {
+  @Get('me')
+  me(@CurrentUser() user: AuthenticatedUser): AuthenticatedUser {
+    return user;
   }
 }

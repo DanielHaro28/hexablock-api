@@ -5,12 +5,20 @@ import { APP_CONFIG } from '../../common/config/config.module.js';
 import type { IUserRepository } from '../users/application/user-repository.js';
 import { USER_REPOSITORY } from '../users/users.tokens.js';
 import { UsersModule } from '../users/users.module.js';
+import { LoginUseCase } from './application/login.use-case.js';
 import type { IPasswordHasher } from './application/password-hasher.js';
 import { RegisterUserUseCase } from './application/register-user.use-case.js';
 import type { ITokenIssuer } from './application/token-issuer.js';
-import { PASSWORD_HASHER, REGISTER_USER, TOKEN_ISSUER } from './auth.tokens.js';
+import {
+  LOGIN_USER,
+  PASSWORD_HASHER,
+  REGISTER_USER,
+  TOKEN_ISSUER,
+  TOKEN_VERIFIER,
+} from './auth.tokens.js';
 import { Argon2PasswordHasher } from './infrastructure/argon2-password-hasher.js';
 import { JwtTokenIssuer } from './infrastructure/jwt-token-issuer.js';
+import { JwtTokenVerifier } from './infrastructure/jwt-token-verifier.js';
 import { AuthController } from './presentation/auth.controller.js';
 
 /** Composition root of `auth` (layer 4): the ports are wired to their adapters, and the use cases to the ports. */
@@ -27,14 +35,24 @@ import { AuthController } from './presentation/auth.controller.js';
   providers: [
     Argon2PasswordHasher,
     JwtTokenIssuer,
+    JwtTokenVerifier,
     { provide: PASSWORD_HASHER, useExisting: Argon2PasswordHasher },
     { provide: TOKEN_ISSUER, useExisting: JwtTokenIssuer },
+    { provide: TOKEN_VERIFIER, useExisting: JwtTokenVerifier },
     {
       provide: REGISTER_USER,
       inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER],
       useFactory: (users: IUserRepository, hasher: IPasswordHasher, tokens: ITokenIssuer) =>
         new RegisterUserUseCase(users, hasher, tokens),
     },
+    {
+      provide: LOGIN_USER,
+      inject: [USER_REPOSITORY, PASSWORD_HASHER, TOKEN_ISSUER],
+      useFactory: (users: IUserRepository, hasher: IPasswordHasher, tokens: ITokenIssuer) =>
+        new LoginUseCase(users, hasher, tokens),
+    },
   ],
+  // `TOKEN_VERIFIER` is exported for the global guard of `AppModule`.
+  exports: [TOKEN_VERIFIER],
 })
 export class AuthModule {}
