@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-25 (IA-82)
+> **Última actualización:** 2026-11-25 (IA-83)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -581,13 +581,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) La primera versión de la prueba de la regla "la versión debe subir" no la probaba: el *fake* del repositorio repetía la regla, y quitarla del caso de uso no hacía fallar nada. Lo detectó la comprobación de mutación; el *fake* ya no la aplica y la regla del adaptador se prueba con PostgreSQL. (2) Un fallo de las pruebas e2e (401 en vez de 403) era de la prueba: el login rechaza el campo `displayName` que se le mandaba por error; la respuesta del servidor era la correcta. (3) La regla de que el `id` diga la topología (`fit-hex-001` con topología `hex`, D-47) no estaba en el esquema ni en RN-HF-12; se agregó como `rn-com-70-id`. (4) Comprobación de mutación: quitar `@Roles` hizo fallar 1 prueba, quitar la regla de la versión 2 y quitar la de "no existe" 1. (5) Con la aplicación compilada y una base real: `/health` 200, la descarga pública 200 y la publicación sin token 401 |
 
+### IA-83 · API-03 (parte 1): consolidación del progreso y política de plausibilidad — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #10 (API-03), primera de tres partes apiladas (D-137): `ProgressConsolidator`, el port a TypeScript de la consolidación de `docs/contracts/check_contracts.py` (unión de niveles, máximo del récord, mejor intento de cada nivel entero por el criterio de la variante, y la fecha más antigua como último desempate) probado con E-COM-2 (cualquier orden, repetir, envío parcial); y `PlausibilityPolicy` (estrellas de 1 a 3, puntaje de 0 al tope de la variante, fecha no más de 5 minutos en el futuro) |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) Los documentos piden "un tope por variante (configurable)" pero no dan números. Los topes iniciales (`hexa-lines` 1 000 000, `hexa-merge` 10 000 000, `hexa-sort` 1 000 000) son una suposición generosa de la IA que el equipo debe sustituir por lo que cada variante puede alcanzar. (2) Hexa Fit no tiene puntaje (solo estrellas, tiempo y movimientos), así que un resultado de Fit sin estrellas no es plausible. (3) Comprobación de mutación: quitar los movimientos del criterio de Fit, invertir el puntaje de Sort y no copiar las secciones hicieron fallar 1 prueba cada uno; una mutación del último desempate sobrevivió porque cualquier elección determinista cumple la regla, y se agregó una prueba de que el orden de los argumentos no cambia el resultado cuando dos intentos son el mismo instante escrito distinto. (4) El criterio de orden de la consolidación es el mismo del ranking (RN-COM-101 a 103), así que la parte del ranking (API-04) puede reutilizarlo |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81) y rutas de administrador (LVL-02, IA-82): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81), rutas de administrador (LVL-02, IA-82) y consolidación y plausibilidad (API-03, IA-83): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
