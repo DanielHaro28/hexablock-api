@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-25 (IA-84)
+> **Última actualización:** 2026-11-25 (IA-85)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -603,13 +603,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) Una prueba de la IA esperaba un 400 cuando se manda `?userId=` en la consulta; la ruta no tiene DTO de consulta, así que el parámetro simplemente no se lee y la respuesta correcta es el progreso del usuario del token. Se corrigió la prueba, no el servidor: lo que importa a SEC-API-01 es que ese valor no llegue al repositorio. (2) Comprobación de mutación: quitar el filtro por usuario del repositorio hizo fallar 3 pruebas y pasar un usuario fijo desde el controlador hizo fallar 4 |
 
+### IA-85 · API-03 (parte 3): caso de uso de la sincronización del progreso — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #10 (API-03), tercera de cuatro partes apiladas (D-137; la IA pasó de tres a cuatro al ver el tamaño): los puertos `IClock`, `ILevelCatalog`, `IProgressSchemaChecker` y `ITransactionRunner` (con su unidad de trabajo: bloquear la fila del usuario y la variante, guardar el progreso y los mejores intentos) y `SyncProgressUseCase` (forma del cuerpo y de cada sección para la variante de la ruta, plausibilidad, existencia del nivel para esa variante y figura, consolidación en una transacción y respuesta con el valor consolidado de lo enviado); pruebas con E-COM-2, repetir y enviar solo el nivel que cambió |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) La forma de cada sección para la variante de la ruta no se puede comprobar con `progressUpdate` solo (acepta las tres formas): se compone `{gameId de la ruta, sections del cuerpo}` y se valida contra `gameProgress`, que ya trae esa regla por variante en el contrato. (2) Comprobación de mutación sobre cinco controles: responder todo lo guardado, no comprobar la existencia del nivel, no comprobar la plausibilidad y aceptar un nivel de otra variante hicieron fallar 3, 4, 4 y 1 pruebas; aceptar la topología `any` en cualquier variante sobrevivió y se agregó una prueba (la API no debe confiar en que el catálogo solo tiene filas válidas). (3) Una fila de `progress` que todavía no existe no se puede bloquear con `FOR UPDATE`: la parte 4 la crea con `ON CONFLICT DO NOTHING` antes de bloquearla, para que dos primeras sincronizaciones a la vez no choquen. (4) Los resultados de Hexa Sort con topología `any` se aceptan en la sección de cualquier figura (RN-COM-75) |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81), rutas de administrador (LVL-02, IA-82), consolidación y plausibilidad (API-03, IA-83) y lectura del progreso (API-03, IA-84): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81), rutas de administrador (LVL-02, IA-82), consolidación y plausibilidad (API-03, IA-83), lectura del progreso (API-03, IA-84) y caso de uso de la sincronización (API-03, IA-85): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
