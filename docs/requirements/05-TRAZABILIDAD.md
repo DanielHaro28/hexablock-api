@@ -35,7 +35,7 @@
 |---|---|---|---|---|
 | RF-70 | API-01 | RN-COM-109, SEC-API-02, 03, 04 | — | `test/unit/modules/auth/*.spec.ts`, `test/integration/users/prisma-user-repository.spec.ts`, `test/e2e/register.spec.ts` |
 | RF-71 | API-02 | SEC-API-01, 02, 04 | — | `test/unit/modules/auth/login.use-case.spec.ts`, `test/unit/modules/auth/jwt-token-verifier.spec.ts`, `test/e2e/login.spec.ts`, `test/e2e/auth-guard.spec.ts` |
-| RF-72 | API-03 | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | E-COM-2 | `test/unit/modules/progress/progress-consolidator.spec.ts`, `test/unit/modules/progress/get-progress.use-case.spec.ts`, `test/integration/progress/prisma-progress-repository.spec.ts`, `test/e2e/progress-read.spec.ts` (falta la sincronización) |
+| RF-72 | API-03 | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | E-COM-2 | `test/unit/modules/progress/progress-consolidator.spec.ts`, `test/unit/modules/progress/get-progress.use-case.spec.ts`, `test/integration/progress/prisma-progress-repository.spec.ts`, `test/e2e/progress-read.spec.ts`, `test/unit/modules/progress/sync-progress.use-case.spec.ts` (falta la ruta) |
 | RF-74 | API-04 | RN-COM-100 a 107 | E-COM-3 | |
 | RF-80 | LVL-01 | RN-COM-70, 72, 75, 77 | — | `test/unit/modules/levels/*.spec.ts`, `test/integration/levels/prisma-level-repository.spec.ts`, `test/e2e/levels.spec.ts` |
 | RF-81 | LVL-02 | RN-COM-70, 71, SEC-API-05 | — | `test/e2e/level-admin.spec.ts`, `test/e2e/roles.spec.ts`, `test/unit/modules/levels/upsert-level.use-case.spec.ts` |
