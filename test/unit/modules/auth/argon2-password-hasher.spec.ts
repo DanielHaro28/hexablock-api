@@ -1,5 +1,5 @@
 import { describe, expect, it } from '@jest/globals';
-import { verify } from 'argon2';
+import { hash as argon2Hash, verify } from 'argon2';
 import { Argon2PasswordHasher } from '../../../../src/modules/auth/infrastructure/argon2-password-hasher.js';
 
 describe('SEC-API-02 · Argon2PasswordHasher', () => {
@@ -50,5 +50,37 @@ describe('SEC-API-02 · Argon2PasswordHasher', () => {
     // Assert
     await expect(verify(hash, `${base}a`)).resolves.toBe(true);
     await expect(verify(hash, `${base}b`)).resolves.toBe(false);
+  });
+
+  it('should_verify_the_password_of_a_hash_it_made_when_verifying', async () => {
+    // Arrange
+    const hash = await hasher.hash('a long passphrase of mine');
+
+    // Act
+    const right = await hasher.verify(hash, 'a long passphrase of mine');
+    const wrong = await hasher.verify(hash, 'a long passphrase of mine!');
+
+    // Assert
+    expect(right).toBe(true);
+    expect(wrong).toBe(false);
+  });
+
+  it('should_verify_a_hash_with_other_parameters_when_the_cost_was_raised_later', async () => {
+    // Arrange: a hash stored with the library defaults, not with the setting of the hasher
+    const stored = await argon2Hash('a long passphrase of mine', { type: 2 });
+
+    // Act
+    const matches = await hasher.verify(stored, 'a long passphrase of mine');
+
+    // Assert
+    expect(matches).toBe(true);
+  });
+
+  it('should_answer_false_and_not_throw_when_the_stored_hash_is_not_a_hash', async () => {
+    // Act
+    const matches = await hasher.verify('not-a-hash', 'a long passphrase of mine');
+
+    // Assert
+    expect(matches).toBe(false);
   });
 });

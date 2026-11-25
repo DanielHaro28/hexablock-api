@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { argon2id, hash } from 'argon2';
+import { argon2id, hash, verify } from 'argon2';
 import type { IPasswordHasher } from '../application/password-hasher.js';
 
 /**
@@ -11,5 +11,14 @@ import type { IPasswordHasher } from '../application/password-hasher.js';
 export class Argon2PasswordHasher implements IPasswordHasher {
   hash(password: string): Promise<string> {
     return hash(password, { type: argon2id, memoryCost: 19_456, timeCost: 2, parallelism: 1 });
+  }
+
+  async verify(passwordHash: string, password: string): Promise<boolean> {
+    try {
+      return await verify(passwordHash, password);
+    } catch {
+      // A hash that cannot be read (corrupt data) is a failed check, not a server error.
+      return false;
+    }
   }
 }
