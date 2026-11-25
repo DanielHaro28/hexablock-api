@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-25 (IA-83)
+> **Última actualización:** 2026-11-25 (IA-84)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -592,13 +592,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) Los documentos piden "un tope por variante (configurable)" pero no dan números. Los topes iniciales (`hexa-lines` 1 000 000, `hexa-merge` 10 000 000, `hexa-sort` 1 000 000) son una suposición generosa de la IA que el equipo debe sustituir por lo que cada variante puede alcanzar. (2) Hexa Fit no tiene puntaje (solo estrellas, tiempo y movimientos), así que un resultado de Fit sin estrellas no es plausible. (3) Comprobación de mutación: quitar los movimientos del criterio de Fit, invertir el puntaje de Sort y no copiar las secciones hicieron fallar 1 prueba cada uno; una mutación del último desempate sobrevivió porque cualquier elección determinista cumple la regla, y se agregó una prueba de que el orden de los argumentos no cambia el resultado cuando dos intentos son el mismo instante escrito distinto. (4) El criterio de orden de la consolidación es el mismo del ranking (RN-COM-101 a 103), así que la parte del ranking (API-04) puede reutilizarlo |
 
+### IA-84 · API-03 (parte 2): leer el progreso (`GET /v1/me/progress`) — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #10 (API-03), segunda de tres partes apiladas (D-137): `GetProgressUseCase` con el puerto `IProgressRepository`, `PrismaProgressRepository` (una fila por usuario y variante) y `GET /v1/me/progress`, con el usuario del token y nada más; pruebas unitarias, de integración y e2e contra `openapi.yaml`, incluida la de SEC-API-01 (nadie ve el progreso de otro) |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) Una prueba de la IA esperaba un 400 cuando se manda `?userId=` en la consulta; la ruta no tiene DTO de consulta, así que el parámetro simplemente no se lee y la respuesta correcta es el progreso del usuario del token. Se corrigió la prueba, no el servidor: lo que importa a SEC-API-01 es que ese valor no llegue al repositorio. (2) Comprobación de mutación: quitar el filtro por usuario del repositorio hizo fallar 3 pruebas y pasar un usuario fijo desde el controlador hizo fallar 4 |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81), rutas de administrador (LVL-02, IA-82) y consolidación y plausibilidad (API-03, IA-83): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81), rutas de administrador (LVL-02, IA-82), consolidación y plausibilidad (API-03, IA-83) y lectura del progreso (API-03, IA-84): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
