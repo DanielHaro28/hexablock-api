@@ -2,20 +2,13 @@ import type { UseCase } from '../../../common/application/use-case.js';
 import { ValidationError } from '../../../common/domain/domain-error.js';
 import type { IUserRepository } from '../../users/application/user-repository.js';
 import { PasswordPolicy } from '../domain/password-policy.js';
+import type { AuthResult } from './auth-result.js';
 import type { IPasswordHasher } from './password-hasher.js';
 import type { ITokenIssuer } from './token-issuer.js';
 
 export interface RegisterInput {
   readonly email: string;
   readonly password: string;
-  readonly displayName: string;
-}
-
-/** The session that starts when an account is created or a login succeeds. */
-export interface AuthResult {
-  readonly accessToken: string;
-  /** Seconds (D-44). */
-  readonly expiresIn: number;
   readonly displayName: string;
 }
 

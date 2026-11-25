@@ -2,4 +2,7 @@
 export interface IPasswordHasher {
   /** A salted hash that includes its own parameters. The password is never stored or logged. */
   hash(password: string): Promise<string>;
+
+  /** True when `password` is the one that produced `hash`. A malformed hash is `false`, never an error. */
+  verify(hash: string, password: string): Promise<boolean>;
 }

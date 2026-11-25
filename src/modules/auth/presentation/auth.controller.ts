@@ -1,6 +1,7 @@
 import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
 import type { UseCase } from '../../../common/application/use-case.js';
-import type { AuthResult, RegisterInput } from '../application/register-user.use-case.js';
+import type { AuthResult } from '../application/auth-result.js';
+import type { RegisterInput } from '../application/register-user.use-case.js';
 import { REGISTER_USER } from '../auth.tokens.js';
 import { RegisterDto } from './register.dto.js';
 
