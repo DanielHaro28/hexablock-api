@@ -1,8 +1,16 @@
 import { Module } from '@nestjs/common';
+import { PrismaUserRepository } from './infrastructure/prisma-user-repository.js';
+import { USER_REPOSITORY } from './users.tokens.js';
 
 /**
- * Composition root of the `users` module (layer 4, ARQ-01-API §2): the place where ports are wired to their
- * implementations. It stays empty until the module's first story (ARQ-03-API §3).
+ * Composition root of `users` (layer 4, ARQ-01-API §2): the `IUserRepository` port is wired to its Prisma
+ * adapter and exported, so `auth` depends on the port and never on the adapter (ARQ-01-API §3).
  */
-@Module({})
+@Module({
+  providers: [
+    PrismaUserRepository,
+    { provide: USER_REPOSITORY, useExisting: PrismaUserRepository },
+  ],
+  exports: [USER_REPOSITORY],
+})
 export class UsersModule {}

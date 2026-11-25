@@ -20,10 +20,23 @@ const TEST_ENV: Readonly<Record<string, string>> = {
 export interface TestAppOptions {
   /** Overrides of the environment, e.g. a low `THROTTLE_AUTH_LIMIT` to test rate limiting. */
   readonly env?: Readonly<Record<string, string>>;
+  /**
+   * Use the real PostgreSQL of `DATABASE_URL` instead of a stub (for the routes that store data). The tests
+   * that set it start from an empty database (`truncateAll`). Default: no database.
+   */
+  readonly database?: boolean;
   /** What the health probe answers. Default: the database is available. */
   readonly databaseAvailable?: boolean;
   /** Routes that exist only in the test. Default: the probe controllers. */
   readonly controllers?: Type[];
+}
+
+function requireDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL;
+  if (url === undefined || url === '') {
+    throw new Error('DATABASE_URL is required for the e2e tests that use the database');
+  }
+  return url;
 }
 
 /**
@@ -35,17 +48,25 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestE
   Logger.overrideLogger(false);
 
   // The configuration reads process.env while the module is built; the environment is restored right after.
-  const overrides = { ...TEST_ENV, ...options.env };
+  const overrides = {
+    ...TEST_ENV,
+    ...(options.database === true ? { DATABASE_URL: requireDatabaseUrl() } : {}),
+    ...options.env,
+  };
   const previous = Object.fromEntries(Object.keys(overrides).map((key) => [key, process.env[key]]));
   Object.assign(process.env, overrides);
 
   try {
-    const moduleRef = await Test.createTestingModule({
+    const builder = Test.createTestingModule({
       imports: [AppModule],
       controllers: options.controllers ?? [ProbeController, FakeAuthController],
-    })
-      .overrideProvider(PrismaService)
-      .useValue({ onModuleInit: () => undefined, onModuleDestroy: () => undefined })
+    });
+    if (options.database !== true) {
+      builder
+        .overrideProvider(PrismaService)
+        .useValue({ onModuleInit: () => undefined, onModuleDestroy: () => undefined });
+    }
+    const moduleRef = await builder
       .overrideProvider(HEALTH_PROBE)
       .useValue({ isDatabaseAvailable: () => Promise.resolve(options.databaseAvailable ?? true) })
       .compile();
