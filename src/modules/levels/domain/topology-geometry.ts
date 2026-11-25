@@ -77,3 +77,45 @@ export function isConnected(topology: Topology, cells: readonly Cell[]): boolean
   }
   return pending.size === 0;
 }
+
+/** All the integers from `from` to `to`, both included. */
+function range(from: number, to: number): number[] {
+  return Array.from({ length: to - from + 1 }, (_, index) => from + index);
+}
+
+/**
+ * The default board of Hexa Sort for a topology (RN-TOP-11), used when a level does not declare its own `board`:
+ * a hexagon of radius 2 (19 cells, RN-HEX-05), 4 wide by 5 tall in squares (20), a hexagon of side 2 in
+ * triangles (24, RN-TRI-09) and a 3 x 3 x 3 box in cubes (27).
+ *
+ * The documents do not say where squares and cubes start. Like the other topologies, they are taken from the
+ * origin: `x` from 0 to 3 and `y` from 0 to 4 in squares, and 0 to 2 on each axis in cubes. A level that needs
+ * other cells declares its own `board`.
+ */
+export function defaultSortBoard(topology: Topology): Cell[] {
+  switch (topology) {
+    case 'hex':
+      return range(-2, 2).flatMap((q) =>
+        range(-2, 2)
+          .filter((r) => Math.max(Math.abs(q), Math.abs(r), Math.abs(-q - r)) <= 2)
+          .map((r): Cell => [q, r]),
+      );
+    case 'square':
+      return range(0, 3).flatMap((x) => range(0, 4).map((y): Cell => [x, y]));
+    case 'tri':
+      // Rows F, diagonals D and A, each from -2 to 1 (RN-TRI-02, RN-TRI-09)
+      return range(-6, 6).flatMap((x) =>
+        range(-2, 1)
+          .filter((y) => {
+            const diagonalD = Math.floor((x + y) / 2);
+            const diagonalA = Math.floor((y - x) / 2);
+            return diagonalD >= -2 && diagonalD <= 1 && diagonalA >= -2 && diagonalA <= 1;
+          })
+          .map((y): Cell => [x, y]),
+      );
+    case 'cube':
+      return range(0, 2).flatMap((x) =>
+        range(0, 2).flatMap((y) => range(0, 2).map((z): Cell => [x, y, z])),
+      );
+  }
+}
