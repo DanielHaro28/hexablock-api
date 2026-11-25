@@ -29,11 +29,13 @@ npm run start:dev                                          # API on http://local
 
 Once it runs: `GET /health` (API and database) and the Swagger UI in `/docs`, generated from [`docs/contracts/openapi.yaml`](docs/contracts/openapi.yaml). Every error is Problem Details (RFC 9457) with a `code`.
 
+Accounts: `POST /v1/auth/register` creates an account and starts the session (JWT of 24 hours). Passwords are 15 to 128 characters, hashed with argon2id, and checked against a list of common passwords (D-52); the e-mail and the display name are unique ignoring case. Registration and login are limited to 5 attempts per minute per IP.
+
 | Command | What it does |
 |---|---|
 | `npm run lint` · `npm run format:check` | ESLint (includes the Clean Architecture import rules) and Prettier |
 | `npm test` | Unit tests (no database) |
-| `npm run test:e2e` | HTTP tests of the whole application with the real global pipeline; responses are checked against `openapi.yaml`. They use fakes for the database when they can |
+| `npm run test:e2e` | HTTP tests of the whole application with the real global pipeline; responses are checked against `openapi.yaml`. They use fakes for the database when they can; the ones that store data (`register.spec.ts`) need `DATABASE_URL` like the integration tests |
 | `npm run test:integration` | Tests against a real PostgreSQL (`DATABASE_URL` must point to a test database that has the migrations) |
 | `npm run test:cov` | All tests with the coverage thresholds of D-58 |
 | `npm run build` | Compiles to `dist/` |

@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-24 (IA-76)
+> **Última actualización:** 2026-11-24 (IA-77)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -515,13 +515,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | La revisión de otro integrante (24-11-2026) encontró que el límite estricto de `/v1/auth/*` se saltaba cambiando mayúsculas en la ruta (`/V1/AUTH/login`): se corrigió y se agregó una prueba. Sugirió un tiempo máximo para `/health` (hecho), reutilizar la comprobación de carpeta del contrato en `externalValue` (hecho) y documentar por qué otros 4xx salen como `validation-failed` (hecho). La entrada pasó de `IA-52` a `IA-76`. ⚠️ completar el resto cuando cierre la revisión de las pruebas (D-59) |
 | Lecciones | (1) La IA supuso que Nest dejaba pasar el `type` del error de `body-parser` y programó un código `malformed-json`; en realidad Nest convierte el `SyntaxError` en `BadRequestException`. Lo detectó una prueba e2e y se eliminó esa rama muerta. (2) `@nestjs/throttler` es CommonJS y `@nestjs/common` 12 es ESM: Jest falla con "require(esm) in a cycle" aunque Node real funciona. Se resolvió precargando ambos antes de las pruebas (`test/support/preload.ts`), y se comprobó con un arranque real de `node dist/main.js`. (3) Las rutas POST de Nest devuelven 201 por defecto; las rutas de prueba que imitan el login tuvieron que fijar 200 como dice el contrato. (4) El *throttler* pone `Retry-After-<nombre>` para los límites con nombre, y el contrato pide `Retry-After`: se sobrescribió el guard. (5) Los esquemas del contrato usan un `$id` absoluto de un dominio de ejemplo, y el lector de referencias intentaba descargarlos: se añadió un resolvedor que lee solo `docs/contracts/`. (6) Comprobación de mutación sobre tres controles (quitar `forbidNonWhitelisted`, helmet y `Retry-After`): las pruebas fallaron en los tres casos. (7) La prueba de `PrismaHealthProbe` con la base disponible no se pudo ejecutar al principio porque Docker quedó sin disco; después se corrió contra un PostgreSQL 18 de usar y tirar y pasó. (8) La IA no vio que el límite estricto dependía de mayúsculas y minúsculas de la ruta, y el primer arreglo que probó (`case sensitive routing` de Express) no hacía efecto porque el router ya estaba creado; la prueba que debía devolver 404 devolvió 429 y mostró que lo que arreglaba el hueco era comparar en minúsculas |
 
+### IA-77 · API-01: registro de cuentas (`POST /v1/auth/register`) — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 24-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #8 (API-01): `PasswordPolicy` (15 a 128 caracteres contados como puntos de código, lista de contraseñas comunes de 327 entradas), `RegisterUserUseCase` con los puertos `IUserRepository`, `IPasswordHasher` e `ITokenIssuer`, `Argon2PasswordHasher` (argon2id, 19 MiB), `JwtTokenIssuer` (HS256, 24 h, solo `sub` y `role`), `PrismaUserRepository` (los índices únicos `citext` deciden qué está repetido, también con peticiones simultáneas), `AuthController` con `RegisterDto` y el cableado de `auth` y `users`; pruebas unitarias, de integración (PostgreSQL) y e2e contra `openapi.yaml`; dependencias `argon2` 0.45.2 y `@nestjs/jwt` 12.0.5, verificadas en npmjs.com (SEC-AGT-04) |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) La lista de contraseñas comunes de la NCSC tiene entradas que son volcados hexadecimales de otro texto (`$HEX[...]`): se filtraron. (2) Con el mínimo de 15 caracteres casi todas las contraseñas comunes ya salen como `too-short`, y solo 327 de las 100 000 de la lista tienen 15 o más; ampliar la cobertura (por ejemplo, rechazar una palabra común repetida) es una decisión del equipo. (3) Comprobación de mutación: quitar `toLowerCase()` del correo hizo fallar 2 pruebas y desactivar la política de contraseñas hizo fallar 8. (4) Las pruebas de integración y e2e de registro necesitan PostgreSQL, así que `npm run test:e2e` ya no corre sin `DATABASE_URL`. (5) Las imágenes `alpine` de Docker necesitan la versión *musl* de `argon2`: el paquete la trae, pero la imagen Docker no se pudo construir en esta máquina, así que sigue sin probarse |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75): escrito con Claude Code y pendiente de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76) y registro (API-01, IA-77): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
@@ -548,6 +559,8 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Código `malformed-json` para el JSON mal formado, basado en un dato de `body-parser` que Nest descarta al convertir el error | Prueba e2e con un cuerpo roto (IA-76) | Se eliminó la rama; el error usa `invalid-request` con puntero vacío |
 | Rutas de prueba POST sin `@HttpCode(200)`, aunque el contrato del login dice 200 | Prueba e2e que esperaba 200 (IA-76) | `@HttpCode(200)` en las rutas de prueba |
 | El límite estricto de `/v1/auth/*` se saltaba con `POST /V1/AUTH/login`, porque la ruta se comparaba con mayúsculas y minúsculas y Express no distingue | Revisión de otro integrante del PR (IA-76) | Comparación en minúsculas y prueba e2e con la ruta en mayúsculas. El primer intento, `case sensitive routing`, no tenía efecto y se descartó al ver que la prueba daba 429 en vez de 404 |
+| Una prueba que debía comprobar que `too-short` va antes que `too-common` usaba una contraseña que no estaba en la lista, así que pasaba aunque el orden fuera otro | Al revisar qué contraseña usaba (IA-77) | Se quitó: la lista solo tiene entradas de 15 o más caracteres y el orden no se puede probar con ella |
+| La lista de la NCSC incluye volcados hexadecimales de otro texto (`$HEX[...]`) como si fueran contraseñas | Al leer las entradas de 15 o más caracteres (IA-77) | Se filtraron al generar `common-passwords.ts` |
 
 ### 4.3 Reflexión del equipo
 
@@ -561,6 +574,9 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Coordenadas axiales y cúbicas de hexágonos, vecindad, rotación y distancia | A. Patel, "Hexagonal Grids", Red Blob Games | `hexablock-app/docs/requirements/02-RN-TOPOLOGIAS.md` (RN-HEX-*) |
 | Riesgos de seguridad | OWASP API Security Top 10 (2023), OWASP Top 10:2025, OWASP MASVS, OWASP Top 10 for Agentic Applications (2026) | `docs/security/SECURITY-BASELINE.md` |
 | Formato de commits | Conventional Commits 1.0.0 | Enunciado §6.2, ADR-001 §2.4 |
+| Parámetros de argon2id (19 MiB, 2 pasadas, 1 hilo) | OWASP, *Password Storage Cheat Sheet*, 2026 | `Argon2PasswordHasher` |
+| Reglas de contraseñas (longitud 15 a 128, sin reglas de composición, lista de comunes) | NIST SP 800-63B rev. 4, *Digital Identity Guidelines: Authentication*, 2025 | `PasswordPolicy`, D-52 |
+| Lista de contraseñas comunes | UK National Cyber Security Centre, *100k most used passwords*, publicada en SecLists (D. Miessler, licencia MIT) | `common-passwords.ts` |
 
 Cuando el código implemente uno de estos algoritmos, el comentario de la clase cita la fuente (§7.3).
 
