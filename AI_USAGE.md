@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-24 (IA-79)
+> **Última actualización:** 2026-11-25 (IA-80)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -548,13 +548,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) Comprobación de mutación sobre tres controles: cambiar `>` por `>=` en el cursor hizo fallar 5 pruebas, quitar `any` para Hexa Sort hizo fallar 9 y quitar `@Public()` hizo fallar 20. (2) Al decodificar el cursor, base64url tiene varias escrituras de los mismos bytes (`MTJ` y `MTI` son `12`): sin comparar con la forma exacta que escribe el servidor, un cursor distinto valdría lo mismo. Lo detectó una prueba con ese alias. (3) El contrato dice que la ruta es pública, y con la denegación por defecto de API-02 hubo que marcarla `@Public()` a propósito. (4) La carga de los 25 niveles incluidos (D-61, `prisma/seed/levels/`) no está en ningún Issue de la API y no se hizo aquí |
 
+### IA-80 · LVL-02 (parte 1): geometría de las topologías y reglas estructurales de Hexa Fit — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #13 (LVL-02), primera de tres partes apiladas (D-137): `neighborsOf` e `isConnected` para hexágonos, cuadrados, triángulos y cubos (anexos de `02-RN-TOPOLOGIAS`), y `checkFitStructure` con RN-HF-12 a, b, c, d, e y g, las celdas con la longitud de la topología y las celdas repetidas; cada problema con su JSON Pointer y la regla como `code`; pruebas con el ejemplo compartido E-HF-NIVEL y sus variaciones, y en cuadrados |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) La tercera variación de E-HF-NIVEL en `02-RN-NIVELES` §4 ("A ocupa `{(0,0),(1,0),(2,0)}`, pasa (a)–(e) en el backend") no se cumple tal como está escrita: esas celdas se solapan con la solución de B y falla (d). Para probar lo que quiere decir (pasa en el backend y falla (f) en la app) la prueba también mueve B a las celdas que quedan. (2) El documento de topologías (`02-RN-TOPOLOGIAS`) solo está en el repo de la app, pero el validador de la API necesita sus anexos (vecinas, tablero por defecto): se leyeron de ahí. (3) Comprobación de mutación sobre tres reglas: permitir el solape, quitar la regla de movimientos y quitar la conectividad hicieron fallar 1, 2 y 2 pruebas |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78) y descarga de niveles (LVL-01, IA-79): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79) y reglas de Hexa Fit (LVL-02, IA-80): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
