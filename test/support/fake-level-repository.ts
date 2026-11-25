@@ -1,4 +1,4 @@
-import { ConflictError, NotFoundError } from '../../src/common/domain/domain-error.js';
+import { ConflictError } from '../../src/common/domain/domain-error.js';
 import type {
   ILevelRepository,
   LevelChange,
@@ -44,10 +44,12 @@ export class InMemoryLevelRepository implements ILevelRepository {
     return Promise.resolve();
   }
 
+  /**
+   * Stores the level without checking the version: that rule belongs to `UpsertLevelUseCase`, and the real
+   * adapter also guards it against concurrent requests (tested with PostgreSQL). A fake that repeated the rule
+   * would hide a use case that forgot it.
+   */
   update(level: ValidatedLevel): Promise<void> {
-    const stored = this.published.get(level.id);
-    if (stored === undefined) return Promise.reject(new NotFoundError());
-    if (stored.version >= level.version) return Promise.reject(new ConflictError('stale-version'));
     this.published.set(level.id, level);
     return Promise.resolve();
   }
