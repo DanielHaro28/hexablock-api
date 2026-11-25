@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-25 (IA-81)
+> **Última actualización:** 2026-11-25 (IA-82)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -570,13 +570,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) Los documentos no dicen dónde empiezan los tableros por defecto de cuadrados y cubos (RN-TOP-11 solo da el tamaño): se tomó el origen en `(0,0)` y `(0,0,0)` y se dejó escrito en el código, para que un nivel que necesite otras celdas declare su propio `board`. Solo afecta a niveles de Hexa Sort con pilas iniciales fuera de hexágonos, que hoy no existen. (2) "Parámetros de generación coherentes" (RN-HS-12) no dice qué es coherente: el esquema ya acota las alturas y los bloques, y solo falta que la altura mínima no supere a la máxima. (3) "Bloque de cima de 10 o más" se entendió como las fichas seguidas del mismo color al final de la pila, no como cualquier bloque de la pila. (4) Comprobación de mutación sobre tres reglas: subir el límite de la cima, quitar la paleta y quitar la celda vacía hicieron fallar 1, 2 y 1 pruebas |
 
+### IA-82 · LVL-02 (parte 3): rutas de administrador para publicar y actualizar niveles — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #13 (LVL-02), tercera y última de las partes apiladas (D-137): `RolesGuard` y `@Roles` (SEC-API-05), `AjvLevelSchemaChecker` (el esquema del contrato leído de `docs/contracts`), `LevelValidator` (esquema, convención del `id` de D-47 y reglas de las dos variantes), `UpsertLevelUseCase`, `create`, `update` y `findVersion` en `PrismaLevelRepository` (la versión va en la condición del `UPDATE`) y `POST /v1/levels` y `PUT /v1/levels/{id}`; pruebas unitarias, de integración (incluye dos peticiones a la vez) y e2e contra `openapi.yaml`; `ajv` y `ajv-formats` pasan a dependencias de producción |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) La primera versión de la prueba de la regla "la versión debe subir" no la probaba: el *fake* del repositorio repetía la regla, y quitarla del caso de uso no hacía fallar nada. Lo detectó la comprobación de mutación; el *fake* ya no la aplica y la regla del adaptador se prueba con PostgreSQL. (2) Un fallo de las pruebas e2e (401 en vez de 403) era de la prueba: el login rechaza el campo `displayName` que se le mandaba por error; la respuesta del servidor era la correcta. (3) La regla de que el `id` diga la topología (`fit-hex-001` con topología `hex`, D-47) no estaba en el esquema ni en RN-HF-12; se agregó como `rn-com-70-id`. (4) Comprobación de mutación: quitar `@Roles` hizo fallar 1 prueba, quitar la regla de la versión 2 y quitar la de "no existe" 1. (5) Con la aplicación compilada y una base real: `/health` 200, la descarga pública 200 y la publicación sin token 401 |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80) y de Hexa Sort (LVL-02, IA-81): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78), descarga de niveles (LVL-01, IA-79), reglas de Hexa Fit (LVL-02, IA-80), de Hexa Sort (LVL-02, IA-81) y rutas de administrador (LVL-02, IA-82): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
@@ -606,6 +617,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Una prueba que debía comprobar que `too-short` va antes que `too-common` usaba una contraseña que no estaba en la lista, así que pasaba aunque el orden fuera otro | Al revisar qué contraseña usaba (IA-77) | Se quitó: la lista solo tiene entradas de 15 o más caracteres y el orden no se puede probar con ella |
 | La lista de la NCSC incluye volcados hexadecimales de otro texto (`$HEX[...]`) como si fueran contraseñas | Al leer las entradas de 15 o más caracteres (IA-77) | Se filtraron al generar `common-passwords.ts` |
 | El cursor de niveles aceptaba otras escrituras base64url de los mismos bytes (`MTJ` valía igual que `MTI`) | Prueba con ese alias (IA-79) | `decode` compara con la forma exacta que escribe `encode` |
+| La prueba de "la versión debe subir" no probaba la regla del caso de uso: el *fake* del repositorio también la aplicaba y quitarla no hacía fallar nada | Comprobación de mutación sobre el caso de uso (IA-82) | El *fake* no aplica la regla; el adaptador la prueba con PostgreSQL, también con dos peticiones a la vez |
 
 ### 4.3 Reflexión del equipo
 
