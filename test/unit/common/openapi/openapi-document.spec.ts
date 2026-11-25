@@ -1,5 +1,9 @@
 import { describe, expect, it } from '@jest/globals';
-import { loadOpenApiDocument } from '../../../../src/common/openapi/openapi-document.js';
+import {
+  CONTRACT_DIR,
+  insideContractDir,
+  loadOpenApiDocument,
+} from '../../../../src/common/openapi/openapi-document.js';
 
 describe('TEC-05 · Swagger is generated from openapi.yaml', () => {
   it('should_contain_every_route_of_the_contract_when_the_document_is_loaded', async () => {
@@ -46,4 +50,24 @@ describe('TEC-05 · Swagger is generated from openapi.yaml', () => {
       'display-name-taken',
     );
   });
+});
+
+describe('SEC-API-07 · the contract loader reads only inside docs/contracts', () => {
+  it('should_resolve_the_path_when_it_is_inside_the_contract_folder', () => {
+    // Act
+    const target = insideContractDir(CONTRACT_DIR, 'examples/login.json');
+
+    // Assert
+    expect(target.startsWith(CONTRACT_DIR)).toBe(true);
+  });
+
+  it.each(['../../package.json', '../../../.env', 'examples/../../secret.json'])(
+    'should_refuse_the_path_when_it_leaves_the_contract_folder (%s)',
+    (relative) => {
+      // Act + Assert
+      expect(() => insideContractDir(CONTRACT_DIR, relative)).toThrow(
+        'Reference outside the contract folder',
+      );
+    },
+  );
 });

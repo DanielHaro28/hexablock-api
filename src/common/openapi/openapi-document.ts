@@ -8,6 +8,18 @@ export const CONTRACT_DIR = resolve(import.meta.dirname, '../../../docs/contract
 export const OPENAPI_FILE = resolve(CONTRACT_DIR, 'openapi.yaml');
 
 /**
+ * Resolves `relative` against `baseDir` and refuses anything that ends up outside the contract folder, whatever
+ * the reference says (`../`, an absolute path).
+ */
+export function insideContractDir(baseDir: string, relative: string): string {
+  const target = resolve(baseDir, relative);
+  if (!target.startsWith(CONTRACT_DIR + sep)) {
+    throw new Error('Reference outside the contract folder');
+  }
+  return target;
+}
+
+/**
  * The JSON schemas declare an absolute `$id` under this reserved example domain (RFC 2606), and the parser
  * resolves their references against it. The resolver below answers those URLs from `docs/contracts/`, so
  * nothing is ever fetched from the network (SEC-API-07).
@@ -23,12 +35,7 @@ export const CONTRACT_PARSER_OPTIONS = {
       canRead: (file: { url: string }): boolean => file.url.startsWith(CONTRACT_URL_PREFIX),
       read: async (file: { url: string }): Promise<string> => {
         const relative = new URL(file.url).pathname.slice('/contracts/'.length);
-        const target = resolve(CONTRACT_DIR, relative);
-        // Never read outside the contract folder, whatever the reference says.
-        if (!target.startsWith(CONTRACT_DIR + sep)) {
-          throw new Error('Reference outside the contract folder');
-        }
-        return readFile(target, 'utf8');
+        return readFile(insideContractDir(CONTRACT_DIR, relative), 'utf8');
       },
     },
   },
@@ -55,7 +62,8 @@ async function inlineExampleFiles(node: unknown, baseDir: string): Promise<void>
   const object = node as Record<string, unknown>;
   const external = object['externalValue'];
   if (typeof external === 'string') {
-    object['value'] = JSON.parse(await readFile(resolve(baseDir, external), 'utf8')) as unknown;
+    const target = insideContractDir(baseDir, external);
+    object['value'] = JSON.parse(await readFile(target, 'utf8')) as unknown;
     delete object['externalValue'];
   }
   for (const value of Object.values(object)) await inlineExampleFiles(value, baseDir);
