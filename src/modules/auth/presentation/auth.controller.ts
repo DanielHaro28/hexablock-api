@@ -1,7 +1,11 @@
 import { Body, Controller, HttpCode, Inject, Post } from '@nestjs/common';
 import type { UseCase } from '../../../common/application/use-case.js';
-import type { AuthResult, RegisterInput } from '../application/register-user.use-case.js';
-import { REGISTER_USER } from '../auth.tokens.js';
+import { Public } from '../../../common/presentation/public.js';
+import type { AuthResult } from '../application/auth-result.js';
+import type { Credentials } from '../application/login.use-case.js';
+import type { RegisterInput } from '../application/register-user.use-case.js';
+import { LOGIN_USER, REGISTER_USER } from '../auth.tokens.js';
+import { LoginDto } from './login.dto.js';
 import { RegisterDto } from './register.dto.js';
 
 /** `AuthResponse` of the contract. */
@@ -21,11 +25,16 @@ function toAuthResponse(result: AuthResult): AuthResponse {
   };
 }
 
-/** Thin controller: validates the DTO, calls the use case and answers what the contract says (ARQ-03-API §2). */
+/**
+ * Thin controller: validates the DTO, calls the use case and answers what the contract says (ARQ-03-API §2).
+ * Register and login are the only routes of the application that are open to callers without a token.
+ */
+@Public()
 @Controller('v1/auth')
 export class AuthController {
   constructor(
     @Inject(REGISTER_USER) private readonly registerUser: UseCase<RegisterInput, AuthResult>,
+    @Inject(LOGIN_USER) private readonly loginUser: UseCase<Credentials, AuthResult>,
   ) {}
 
   @Post('register')
@@ -37,6 +46,14 @@ export class AuthController {
         password: dto.password,
         displayName: dto.displayName,
       }),
+    );
+  }
+
+  @Post('login')
+  @HttpCode(200)
+  async login(@Body() dto: LoginDto): Promise<AuthResponse> {
+    return toAuthResponse(
+      await this.loginUser.execute({ email: dto.email, password: dto.password }),
     );
   }
 }

@@ -2,7 +2,7 @@ import { ConflictError } from '../../src/common/domain/domain-error.js';
 import type { IPasswordHasher } from '../../src/modules/auth/application/password-hasher.js';
 import type { ITokenIssuer, IssuedToken } from '../../src/modules/auth/application/token-issuer.js';
 import type { IUserRepository } from '../../src/modules/users/application/user-repository.js';
-import type { NewUser, Role, User } from '../../src/modules/users/domain/user.js';
+import type { NewUser, Role, User, UserCredentials } from '../../src/modules/users/domain/user.js';
 
 /** Hand-written fakes of the account ports (D-56): they keep the data in memory and record what they got. */
 export class InMemoryUserRepository implements IUserRepository {
@@ -26,14 +26,37 @@ export class InMemoryUserRepository implements IUserRepository {
       role: created.role,
     });
   }
+
+  findCredentialsByEmail(email: string): Promise<UserCredentials | undefined> {
+    const found = this.stored.find((user) => user.email.toLowerCase() === email.toLowerCase());
+    return Promise.resolve(
+      found === undefined
+        ? undefined
+        : {
+            id: found.id,
+            displayName: found.displayName,
+            role: found.role,
+            passwordHash: found.passwordHash,
+          },
+    );
+  }
 }
 
+/** A hash that is readable on purpose, so a test can tell what was hashed and what was verified. */
 export class FakePasswordHasher implements IPasswordHasher {
   readonly hashed: string[] = [];
+  readonly verified: { hash: string; password: string }[] = [];
 
   hash(password: string): Promise<string> {
     this.hashed.push(password);
     return Promise.resolve(`hash-of:${password.length}:${password.split('').reverse().join('')}`);
+  }
+
+  verify(hash: string, password: string): Promise<boolean> {
+    this.verified.push({ hash, password });
+    return Promise.resolve(
+      hash === `hash-of:${password.length}:${password.split('').reverse().join('')}`,
+    );
   }
 }
 

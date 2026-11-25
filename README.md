@@ -29,7 +29,7 @@ npm run start:dev                                          # API on http://local
 
 Once it runs: `GET /health` (API and database) and the Swagger UI in `/docs`, generated from [`docs/contracts/openapi.yaml`](docs/contracts/openapi.yaml). Every error is Problem Details (RFC 9457) with a `code`.
 
-Accounts: `POST /v1/auth/register` creates an account and starts the session (JWT of 24 hours). Passwords are 15 to 128 characters, hashed with argon2id, and checked against a list of common passwords (D-52); the e-mail and the display name are unique ignoring case. Registration and login are limited to 5 attempts per minute per IP.
+Accounts: `POST /v1/auth/register` creates an account and starts the session (JWT of 24 hours). Passwords are 15 to 128 characters, hashed with argon2id, and checked against a list of common passwords (D-52); the e-mail and the display name are unique ignoring case. `POST /v1/auth/login` answers the same 401 for an unknown e-mail and a wrong password. Registration and login are limited to 5 attempts per minute per IP. Every other route needs `Authorization: Bearer <token>`: a global guard denies by default, and only register, login and health are marked `@Public()`.
 
 | Command | What it does |
 |---|---|

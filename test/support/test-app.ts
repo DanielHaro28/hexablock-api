@@ -7,7 +7,7 @@ import type { AppConfig } from '../../src/common/config/app-config.js';
 import { APP_CONFIG } from '../../src/common/config/config.module.js';
 import { HEALTH_PROBE } from '../../src/modules/health/health.tokens.js';
 import { PrismaService } from '../../src/prisma/prisma.service.js';
-import { FakeAuthController, ProbeController } from './probe.controllers.js';
+import { PrivateProbeController, ProbeController } from './probe.controllers.js';
 
 const TEST_ENV: Readonly<Record<string, string>> = {
   NODE_ENV: 'test',
@@ -59,7 +59,7 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<NestE
   try {
     const builder = Test.createTestingModule({
       imports: [AppModule],
-      controllers: options.controllers ?? [ProbeController, FakeAuthController],
+      controllers: options.controllers ?? [ProbeController, PrivateProbeController],
     });
     if (options.database !== true) {
       builder

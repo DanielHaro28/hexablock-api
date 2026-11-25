@@ -82,4 +82,28 @@ describe('API-01 · PrismaUserRepository (PostgreSQL)', () => {
     expect(rejected).toMatchObject({ reason: { code: 'email-taken' } });
     expect(await prisma.user.count()).toBe(1);
   });
+
+  it('should_find_the_credentials_when_the_email_has_other_capitals', async () => {
+    // Arrange
+    const created = await repository.create(ANA);
+
+    // Act
+    const found = await repository.findCredentialsByEmail('ANA@EXAMPLE.COM');
+
+    // Assert
+    expect(found).toEqual({
+      id: created.id,
+      displayName: 'AnaP',
+      role: 'USER',
+      passwordHash: '$argon2id$stub',
+    });
+  });
+
+  it('should_find_nothing_when_the_email_has_no_account', async () => {
+    // Act
+    const found = await repository.findCredentialsByEmail('nobody@example.com');
+
+    // Assert
+    expect(found).toBeUndefined();
+  });
 });

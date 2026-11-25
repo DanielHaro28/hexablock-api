@@ -6,6 +6,7 @@ import type { AppConfig } from './common/config/app-config.js';
 import { ConfigModule, APP_CONFIG } from './common/config/config.module.js';
 import { AppThrottlerGuard } from './common/presentation/app-throttler-guard.js';
 import { AuthModule } from './modules/auth/auth.module.js';
+import { JwtAuthGuard } from './modules/auth/presentation/jwt-auth.guard.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { LeaderboardModule } from './modules/leaderboard/leaderboard.module.js';
 import { LevelsModule } from './modules/levels/levels.module.js';
@@ -51,6 +52,11 @@ const ONE_MINUTE_MS = 60_000;
     LevelsModule,
     HealthModule,
   ],
-  providers: [{ provide: APP_GUARD, useClass: AppThrottlerGuard }],
+  // Order matters: the rate limit runs first, so requests without a valid token are counted too; then the JWT
+  // guard denies every route that is not `@Public()` (SEC-API-02, SEC-API-04).
+  providers: [
+    { provide: APP_GUARD, useClass: AppThrottlerGuard },
+    { provide: APP_GUARD, useClass: JwtAuthGuard },
+  ],
 })
 export class AppModule {}

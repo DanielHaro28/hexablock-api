@@ -15,3 +15,11 @@ export interface NewUser {
   readonly passwordHash: string;
   readonly displayName: string;
 }
+
+/** What login needs to check a password: the hash stays out of `User` so it cannot leak into a response. */
+export interface UserCredentials {
+  readonly id: string;
+  readonly displayName: string;
+  readonly role: Role;
+  readonly passwordHash: string;
+}

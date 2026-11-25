@@ -34,7 +34,7 @@
 | RF | Historias | Reglas | Ejemplos (→ pruebas) | Pruebas |
 |---|---|---|---|---|
 | RF-70 | API-01 | RN-COM-109, SEC-API-02, 03, 04 | — | `test/unit/modules/auth/*.spec.ts`, `test/integration/users/prisma-user-repository.spec.ts`, `test/e2e/register.spec.ts` |
-| RF-71 | API-02 | SEC-API-02, 04 | — | |
+| RF-71 | API-02 | SEC-API-01, 02, 04 | — | `test/unit/modules/auth/login.use-case.spec.ts`, `test/unit/modules/auth/jwt-token-verifier.spec.ts`, `test/e2e/login.spec.ts`, `test/e2e/auth-guard.spec.ts` |
 | RF-72 | API-03 | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | E-COM-2 | |
 | RF-74 | API-04 | RN-COM-100 a 107 | E-COM-3 | |
 | RF-80 | LVL-01 | RN-COM-70, 72, 75 | — | |
