@@ -37,7 +37,7 @@
 | RF-71 | API-02 | SEC-API-01, 02, 04 | — | `test/unit/modules/auth/login.use-case.spec.ts`, `test/unit/modules/auth/jwt-token-verifier.spec.ts`, `test/e2e/login.spec.ts`, `test/e2e/auth-guard.spec.ts` |
 | RF-72 | API-03 | RN-COM-80, 83, 84, 86, 90, SEC-API-01 | E-COM-2 | |
 | RF-74 | API-04 | RN-COM-100 a 107 | E-COM-3 | |
-| RF-80 | LVL-01 | RN-COM-70, 72, 75 | — | |
+| RF-80 | LVL-01 | RN-COM-70, 72, 75, 77 | — | `test/unit/modules/levels/*.spec.ts`, `test/integration/levels/prisma-level-repository.spec.ts`, `test/e2e/levels.spec.ts` |
 | RF-81 | LVL-02 | RN-COM-70, 71, SEC-API-05 | — | |
 | RF-82 | LVL-02 | RN-COM-71, 76, RN-HF-12 (a–e, g), RN-HS-12 | E-HF-NIVEL (y sus variaciones a y d) | |
 | RF-90 | TEC-05 | D-23 | — | `test/e2e/health-and-docs.spec.ts`, `test/unit/common/openapi/openapi-document.spec.ts` |

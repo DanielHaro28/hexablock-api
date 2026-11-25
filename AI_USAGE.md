@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-24 (IA-78)
+> **Última actualización:** 2026-11-24 (IA-79)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -537,13 +537,24 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | ⚠️ completar |
 | Lecciones | (1) Comprobación de mutación sobre tres controles: un guard que deja pasar todo hizo fallar 12 pruebas, aceptar también HS512 hizo fallar 1 y saltarse el hash de relleno del login hizo fallar 1. (2) El guard va después del límite de peticiones (`APP_GUARD` en ese orden), para que las peticiones sin token también cuenten. (3) Una petición sin cabecera `Authorization` es un 401 sin más, y una con otro esquema o un token inservible dice `invalid_token` (RFC 6750 §3); la respuesta nunca dice por qué falló el token. (4) Con la denegación por defecto, las rutas de prueba de `TEC-05` tuvieron que marcarse `@Public()`. (5) La igualdad de tiempo entre "correo inexistente" y "contraseña errónea" se prueba contando las comprobaciones de hash, no midiendo tiempo, porque una medición real sería inestable en CI |
 
+### IA-79 · LVL-01: descarga de niveles por cambios (`GET /v1/levels`) — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 24-11-2026 |
+| Herramienta | Claude Code con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | "Continua con las tareas, sin esperar mi procede" (sigue el pedido de IA-75: avanzar en el orden elegido por la IA, siguiendo las reglas del proyecto) |
+| Resultado | Issue #12 (LVL-01): `LevelCursor` (el último `change_seq` en base64url canónico), `topologiesToDeliver` (un nivel de Hexa Sort con topología `any` llega con cualquier figura), `ListLevelsUseCase` con el puerto `ILevelRepository`, `PrismaLevelRepository`, `ListLevelsQuery`, `LevelsController` público y el cableado de `levels`; pruebas unitarias, de integración (incluye que el *trigger* de la base da un número nuevo al actualizar un nivel) y e2e contra `openapi.yaml`, con los niveles de ejemplo del contrato |
+| Modificaciones del equipo | ⚠️ completar |
+| Lecciones | (1) Comprobación de mutación sobre tres controles: cambiar `>` por `>=` en el cursor hizo fallar 5 pruebas, quitar `any` para Hexa Sort hizo fallar 9 y quitar `@Public()` hizo fallar 20. (2) Al decodificar el cursor, base64url tiene varias escrituras de los mismos bytes (`MTJ` y `MTI` son `12`): sin comparar con la forma exacta que escribe el servidor, un cursor distinto valdría lo mismo. Lo detectó una prueba con ese alias. (3) El contrato dice que la ruta es pública, y con la denegación por defecto de API-02 hubo que marcarla `@Public()` a propósito. (4) La carga de los 25 niveles incluidos (D-61, `prisma/seed/levels/`) no está en ningún Issue de la API y no se hizo aquí |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77) e inicio de sesión (API-02, IA-78): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
+| Código del backend | Esqueleto (T-04, IA-75), errores, salud y Swagger (TEC-05, IA-76), registro (API-01, IA-77), inicio de sesión (API-02, IA-78) y descarga de niveles (LVL-01, IA-79): escritos con Claude Code y pendientes de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
@@ -572,6 +583,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | El límite estricto de `/v1/auth/*` se saltaba con `POST /V1/AUTH/login`, porque la ruta se comparaba con mayúsculas y minúsculas y Express no distingue | Revisión de otro integrante del PR (IA-76) | Comparación en minúsculas y prueba e2e con la ruta en mayúsculas. El primer intento, `case sensitive routing`, no tenía efecto y se descartó al ver que la prueba daba 429 en vez de 404 |
 | Una prueba que debía comprobar que `too-short` va antes que `too-common` usaba una contraseña que no estaba en la lista, así que pasaba aunque el orden fuera otro | Al revisar qué contraseña usaba (IA-77) | Se quitó: la lista solo tiene entradas de 15 o más caracteres y el orden no se puede probar con ella |
 | La lista de la NCSC incluye volcados hexadecimales de otro texto (`$HEX[...]`) como si fueran contraseñas | Al leer las entradas de 15 o más caracteres (IA-77) | Se filtraron al generar `common-passwords.ts` |
+| El cursor de niveles aceptaba otras escrituras base64url de los mismos bytes (`MTJ` valía igual que `MTI`) | Prueba con ese alias (IA-79) | `decode` compara con la forma exacta que escribe `encode` |
 
 ### 4.3 Reflexión del equipo
 
