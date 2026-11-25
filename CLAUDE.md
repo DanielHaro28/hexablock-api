@@ -26,7 +26,8 @@ API REST en **NestJS + TypeScript, Prisma y PostgreSQL** para HexaBlock Suite: c
 
 ## Cómo se trabaja
 
-- **Un Issue por PR.** Lee el Issue y las reglas que cita antes de tocar código. Para una historia, usa `/implement-story <ID>`.
+- **Un Issue por PR:** un PR nunca mezcla dos Issues. Lee el Issue y las reglas que cita antes de tocar código. Para una historia, usa `/implement-story <ID>`.
+- **Historias grandes en PR apilados** (D-137): si una historia o tarea pasa de unas 8 h o de unas 600 líneas, su Issue lleva una lista de subtareas y cada una va en su propio PR, con base en la rama de la anterior. Cada PR cita el Issue con `Refs #n` y solo el último lo cierra.
 - **Rama:** `<type>/<descripcion-corta>` desde `main` actualizado. Nunca se trabaja en `main`.
 - **Commits:** Conventional Commits en inglés (`feat(progress): ...`), pequeños y frecuentes.
 - **PR:** usa la plantilla y marca la autorrevisión de verdad. Se integra con *squash*. Lo revisa alguien de otra área (D-62).

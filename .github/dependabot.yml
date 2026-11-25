@@ -1,0 +1,44 @@
+# Dependabot version updates (SECURITY-BASELINE §7, G-03).
+# Alerts and security updates are enabled in the repository settings; this file
+# adds the weekly version updates. Squash merges use the PR title as the commit
+# on main, so the prefixes keep Dependabot titles in Conventional Commits form,
+# e.g. "chore(deps): bump ...".
+# package.json and the Dockerfile arrive with T-04; until then Dependabot
+# reports "dependency file not found" for npm and docker, which is harmless.
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    groups:
+      npm:
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: ci
+      include: scope
+    groups:
+      actions:
+        patterns: ["*"]
