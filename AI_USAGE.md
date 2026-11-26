@@ -4,7 +4,7 @@
 >
 > Las tareas de planificación que producen documentos compartidos aparecen **con el mismo ID** en el `AI_USAGE.md` de `hexablock-app`. Faltan IA-04, IA-06, IA-10 e IA-11 porque solo afectan a la app.
 >
-> **Última actualización:** 2026-11-20 (IA-39)
+> **Última actualización:** 2026-11-24 (IA-75)
 
 Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoce esos datos y no se inventaron.
 
@@ -494,6 +494,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario eligió el merge de `main` entre las tres opciones de Claude (merge, rama y PR nuevos, o que el usuario hiciera el *force push* a mano) y pidió precisar D-137 en los dos repos. Claude lo escribió como precisión de D-137 y no como una decisión nueva, para no reabrirla |
 | Lecciones | (1) D-137 se escribió (IA-63) con un paso que su propia configuración de seguridad prohíbe: ninguna revisión cruzó la decisión con los *hooks*, y apareció la primera vez que se integró un PR apilado. (2) El sistema de permisos rechazó un `git reset --hard` para descartar el rebase local; se hizo el merge en una rama local nueva desde la versión remota y se subió como avance normal, sin borrar nada. La rama local rebasada quedó desalineada y se dejó para que el usuario decida |
 
+### IA-75 · T-04: esqueleto NestJS + Prisma + Docker — solo API
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 22-11-2026 |
+| Herramienta | Claude Code 2.1.330 con Claude Sonnet 5.5 (`claude-sonnet-5-5`), con los permisos y hooks de `.claude/` |
+| Prompt | Paráfrasis fiel (el original es largo): el usuario pide empezar el trabajo de la API sin esperar un "procede"; revisar bien el contexto de los dos repos (instrucciones, reglas, Clean Architecture, contrato, Issues y forma de trabajar); elegir el orden de las tareas y si va todo en un PR o en varios; considerar que el motor del juego todavía no existe y si eso afecta a integrar en `main`; avisar de cualquier regla rara o inconsistencia en vez de ignorarla; y seguir buenas prácticas sin llegar a lo avanzado. Antes pidió que los commits y PR salgan solo con la cuenta de la universidad |
+| Resultado | Issue #17 (T-04): proyecto NestJS 12.5.0 en ESM con TypeScript 6; módulos `auth`, `users`, `progress`, `leaderboard`, `levels` y `health` con sus cuatro carpetas de capas; `UseCase<I, O>` (D-38); configuración validada al arrancar; `PrismaService` con el adaptador de Prisma 7.10.1; esquema y migración inicial (con `citext`, la secuencia `levels_change_seq` y su *trigger*); ESLint con las reglas de capas de ARQ-01-API §8 y la prohibición de `$queryRawUnsafe`; Jest en modo ESM con tres proyectos y los umbrales de D-58; `Dockerfile` multi-stage, `docker-compose.dev.yml` y `.env.example` |
+| Modificaciones del equipo | La revisión de otro integrante (24-11-2026) encontró que `IA-51` ya existía en el `AI_USAGE.md` de la app (los IDs se comparten entre repos): la entrada pasó a `IA-75`. Preguntó si la secuencia `levels_change_seq` generaba una migración nueva; `prisma migrate diff` desde las migraciones y contra la base real salió vacío. Pidió construir la imagen Docker y levantar `docker-compose.dev.yml`, que sigue pendiente. ⚠️ completar el resto cuando cierre la revisión de las pruebas (D-59) |
+| Lecciones | (1) El esquema Prisma de ARQ-04-API era de Prisma 6: en Prisma 7 la URL de la base ya no va en `schema.prisma`. Lo detectó `prisma validate` y se adaptó (la URL pasa a `prisma.config.ts`, el cliente usa un adaptador). (2) La regla de ESLint "un módulo no importa la infraestructura de otro" no se disparaba, porque los imports relativos no llevan `modules/` en la ruta. Lo detectó una prueba con archivos de muestra que debían fallar. (3) `npm audit` marcó un *high* en `effect` (dependencia del CLI de Prisma); se resolvió con un `override` a una versión parcheada de la misma versión mayor. (4) La plantilla oficial de Nest 12 trae Vitest y oxlint, pero el proyecto decidió Jest y ESLint; se siguió lo decidido y se dejó anotada la diferencia. (5) Los umbrales de cobertura por capa hacen fallar a Jest mientras la capa no tiene código; ahora se activan solos cuando aparece. (6) Mutación manual: bajar el mínimo del secreto JWT a 8 bytes hizo fallar una prueba, lo que confirma que la prueba protege la regla. (7) El `Dockerfile` y `docker-compose.dev.yml` **no se pudieron probar de punta a punta**: el disco `C:` de la máquina quedó lleno y Docker Desktop pasó a solo lectura durante la construcción de la imagen. Solo se verificó que PostgreSQL 18.7 con la migración funciona (7 pruebas de integración). Queda pendiente construir la imagen y arrancar la API en contenedor |
+
 ### IA-95 · Aprobación de Antigravity como segunda herramienta de agente (D-159) — compartido
 
 | Campo | Contenido |
@@ -511,7 +522,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 
 | Parte | Asistencia de IA |
 |---|---|
-| Código del backend | 0 %: todavía no hay código |
+| Código del backend | Esqueleto (T-04, IA-75): escrito con Claude Code y pendiente de la revisión del equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión |
 | Documentación de planificación (`docs/`) | Redactada en su mayor parte con Claude; las decisiones (D-*) las tomó el equipo. ⚠️ El equipo estima el porcentaje al cerrar la revisión de los Pasos 1 y 2 |
 
 ### 4.2 Resultados incorrectos o mejorables y cómo se detectaron
@@ -533,6 +544,8 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | `next_id.py` contaba como usados los IDs de ejemplo de su comentario y de una skill | Corriendo el script sobre los repos reales (IA-57) | Solo cuenta Markdown fuera de `.claude/`, con una prueba por caso |
 | Al editar en lote los cuerpos de 26 Issues, un corte de conexión dejó vacío el de #52 (HM-04): el script escribía aunque la lectura hubiera fallado (IA-65) | Verificación posterior del largo y del responsable de cada Issue | Texto restaurado desde el historial de ediciones de GitHub (GraphQL `userContentEdits`); los reintentos se negaban a escribir un cuerpo sin la forma esperada |
 | D-137 pedía rebasar la rama del siguiente PR apilado, lo que exige un *force push* que SEC-AGT-02 prohíbe (IA-63, IA-68) | El *hook* de git bloqueó el *force push* al integrar la primera parte de HL-02 | Precisión de D-137 en los dos repos: merge de `main` en vez de rebase |
+| El esquema Prisma de ARQ-04-API (`url = env(...)` en el `datasource`) no es válido en Prisma ORM 7, la versión elegida en D-89 | `prisma validate` al crear el esquema (IA-75) | La URL pasa a `prisma.config.ts`; el esquema y la nota de ARQ-04-API §2 quedan alineados con Prisma 7 |
+| Regla de ESLint "un módulo no importa la infraestructura de otro" con un patrón que nunca coincidía (los imports relativos no llevan `modules/`) | Archivos de muestra que debían fallar y no fallaban (IA-75) | Patrón `**/<módulo>/infrastructure/**`, comprobado con un import cruzado y con uno del propio módulo |
 
 ### 4.3 Reflexión del equipo
 

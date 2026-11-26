@@ -20,17 +20,19 @@
 | `best_attempts` | usuario, `gameId`, figura y nivel | El mejor intento con columnas, para ordenar el ranking sin abrir el JSON. El récord de Lines y Merge usa `level_id = ''` (vacío) para que la clave única funcione: en PostgreSQL dos `NULL` no chocan |
 | `levels` | nivel | El nivel completo y validado en `data`; `change_seq` es el orden de cambio que codifica el cursor de descarga (D-48) |
 
-## 2. Esquema Prisma (borrador)
+## 2. Esquema Prisma
+
+El esquema vigente está en `prisma/schema.prisma`; esto es un resumen. Con Prisma ORM 7 (D-89) la URL de la base **ya no va en el esquema**: la lee `prisma.config.ts` para las migraciones, y la aplicación crea el cliente con un adaptador (`@prisma/adapter-pg`). La extensión `citext` y la secuencia de `change_seq` se crean en el SQL de la migración inicial, no en el esquema.
 
 ```prisma
 generator client {
-  provider = "prisma-client-js"
+  provider     = "prisma-client"
+  output       = "../src/prisma/generated"
+  moduleFormat = "esm"
 }
 
 datasource db {
-  provider   = "postgresql"
-  url        = env("DATABASE_URL")
-  extensions = [citext]
+  provider = "postgresql"
 }
 
 enum Role {
@@ -87,7 +89,7 @@ model Level {
   order       Int
   version     Int
   data        Json
-  changeSeq   BigInt   @unique @map("change_seq")
+  changeSeq   BigInt   @unique @default(autoincrement()) @map("change_seq")
   publishedAt DateTime @default(now()) @map("published_at") @db.Timestamptz(3)
   updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -97,7 +99,7 @@ model Level {
 ```
 
 Notas:
-- `change_seq` toma su valor de una secuencia de PostgreSQL (`levels_change_seq`) en cada `INSERT` y `UPDATE`. Se crea en la migración con SQL, porque Prisma no asigna una secuencia en un `UPDATE`.
+- `change_seq` toma su valor de una secuencia de PostgreSQL (`levels_change_seq`) en cada `INSERT` y `UPDATE`. En el `INSERT` lo asigna el valor por defecto de la columna (`nextval`, que Prisma lee como `autoincrement()`); en el `UPDATE`, un *trigger* `BEFORE UPDATE`. Ambos están en el SQL de la migración inicial, porque Prisma no asigna una secuencia en un `UPDATE`. La aplicación nunca escribe este campo.
 - `gameId` y `topology` son `text` y no `enum` de PostgreSQL. La lista cerrada vive en el contrato (`common.schema.json`) y la valida el `ValidationPipe`. Así, agregar una variante o una figura no exige una migración (EXTENSIBILITY.md).
 - Ninguna consulta de un usuario usa un id que venga de la URL o del cuerpo. El `userId` siempre sale del `sub` del JWT (SEC-API-01).
 
