@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Squash merges use the PR title as the commit message on main, so the
+  # title is what must follow Conventional Commits (ADR-001 §2.4). Same
+  # commitlint and rules as the local commit-msg hook (D-123). TEC-04 adds
+  # the lint, test and build jobs to this workflow.
+  pr-title:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Dependencies (lockfile only, no install scripts)
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Conventional Commits title (commitlint)
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          if ! printf '%s\n' "$TITLE" | npx --no-install commitlint; then
+            echo "::error::The PR title must follow Conventional Commits, e.g. 'feat(auth): register a user'"
+            exit 1
+          fi
