@@ -16,6 +16,7 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 |---|---|---|---|
 | **Claude** (claude.ai, conversación con herramientas de agente: archivos, terminal, git) | **Claude Opus 5.5** (`claude-opus-5-5`) desde el 12-11-2026. Conversaciones anteriores: ⚠️ completar el modelo | Planificación: propone opciones con ventajas y desventajas, redacta los documentos de `docs/`, verifica los ejemplos de reglas con código, revisa la coherencia entre documentos y sube los cambios por rama y PR | DanielHaro28 |
 | **Claude Code** | ⚠️ completar al empezar a usarlo (versión de la CLI y modelo) | Herramienta principal de implementación (ADR-001 §2.6), con los permisos de `.claude/settings.json`; en el backend, sin acceso a credenciales de AWS ni a la clave SSH de EC2 (SEC-AGT-03) | Todo el equipo |
+| **Antigravity** (Google) | Gemini 4 Neon (High), usada en app #142 y #147. ⚠️ completar la versión | Segunda herramienta de agente, con las condiciones de `docs/ai/APPROVED-TOOLS.md` (D-159) | DanielHaro28 |
 
 ## 2. Cómo aplicamos las buenas prácticas (§7.3)
 
@@ -492,6 +493,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Resultado | Se integró app #127 (la primera parte de HL-02) con *squash* y sin borrar la rama. El rebase de app #128 no se pudo subir: el *hook* de git bloquea el *force push* (SEC-AGT-02). Claude integró `main` en la rama de #128 con un merge (sus dos conflictos venían del *squash* de #127; se tomó la versión de la rama y se comprobó que el árbol no cambiaba), la subió sin *force* y cambió su base a `main`. Después, D-137 en `docs/DECISIONES.md` de los dos repos, con el mismo texto: la rama del siguiente PR apilado integra `main` con un merge en lugar de rebasarse, con el motivo y qué hacer ante un conflicto con el *squash* anterior. Sin Issue (precisa una decisión cerrada) |
 | Modificaciones del equipo | El usuario eligió el merge de `main` entre las tres opciones de Claude (merge, rama y PR nuevos, o que el usuario hiciera el *force push* a mano) y pidió precisar D-137 en los dos repos. Claude lo escribió como precisión de D-137 y no como una decisión nueva, para no reabrirla |
 | Lecciones | (1) D-137 se escribió (IA-63) con un paso que su propia configuración de seguridad prohíbe: ninguna revisión cruzó la decisión con los *hooks*, y apareció la primera vez que se integró un PR apilado. (2) El sistema de permisos rechazó un `git reset --hard` para descartar el rebase local; se hizo el merge en una rama local nueva desde la versión remota y se subió como avance normal, sin borrar nada. La rama local rebasada quedó desalineada y se dejó para que el usuario decida |
+
+### IA-95 · Aprobación de Antigravity como segunda herramienta de agente (D-159) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 25-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`) |
+| Prompt | En la revisión de los PR de PRG-03 (app #142 y #147), Claude señaló que se habían hecho con Antigravity, que no estaba aprobada (D-86, D-87), y propuso tres opciones: aprobarla, registrar una excepción o rehacer los PR. El usuario respondió "1A, 2A, 3A, 4C, 5 lo que creas recomendado y sube las ramas y actualiza los repos" |
+| Resultado | Rama `docs/approve-antigravity` en los dos repos (`/paired-change`). D-159 en `DECISIONES.md` de cada repo. Documentos compartidos, copiados byte a byte: `docs/ai/APPROVED-TOOLS.md` (fila de Antigravity con sus cuatro condiciones; Claude Code sigue como principal y única con configuración), ADR-001 §2.6 (revisión 2.3) y SECURITY-BASELINE §6. Fila de Antigravity en la §1 de este archivo |
+| Modificaciones del equipo | El usuario eligió la opción A, la recomendada era B (excepción puntual). Las cuatro condiciones las redactó Claude a partir de los controles que Antigravity no recibe de `.claude/` (SEC-AGT-02, 03, 05); ⚠️ el equipo las confirma al revisar el PR (CODEOWNERS) |
+| Lecciones | Una herramienta que no lee `.claude/` deja sin efecto los permisos y los *hooks* de agente; lo único que aplica igual son los *hooks* de git y el CI. Por eso la aprobación lleva condiciones de uso y no solo la fila de la lista |
 
 ## 4. Evaluación crítica
 
