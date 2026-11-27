@@ -527,6 +527,17 @@ Los campos marcados con ⚠️ los tiene que completar el equipo: la IA no conoc
 | Modificaciones del equipo | El usuario eligió D entre cuatro opciones y confirmó que aplica a los dos repos. La revisión obligatoria del *ruleset* y el campo **Horas reales** del tablero los hace él a mano. Las horas de este PR las anota él |
 | Lecciones | GitHub guarda la descripción de un PR con CRLF, así que la comprobación quita `\r` antes de buscar la línea; sin eso, una descripción bien llena fallaba. La primera versión del workflow tenía un nombre de paso con `: ` sin comillas, que YAML lee como un mapa: GitHub no lo corrió y no avisó en el PR (solo marcó una ejecución fallida en el *push*). Se detectó porque el check `real-hours` no aparecía, y se validó después con el paquete `yaml` de Dart |
 
+### IA-105 · Dos decisiones abiertas que salieron de las revisiones (D-167 y D-168) y horas reales no obligatorias (D-169) — compartido
+
+| Campo | Contenido |
+|---|---|
+| Fecha | 27-11-2026 |
+| Herramienta | Claude Code (extensión de VS Code) con Claude Opus 5.5 (`claude-opus-5-5`) |
+| Prompt | "si haces codigo o arreglas cosas estas chequeando con los skills de arqui y seguridad…" "las nuevas solo anotalas y despues vemos" y, sobre las horas reales, "Las tareas a mano de D-128" (no se van a hacer) |
+| Resultado | `architecture-reviewer` y `security-reviewer` revisaron los PR #160 a #164 y api #64 y #66. Dos de sus hallazgos son decisiones del equipo y quedan abiertas en `PENDIENTES.md`, cada una con sus opciones y una recomendación: D-167 (qué recibe el jugador si su nivel ya no está al empezar) y D-168 (si se validan las horas reales). Los demás hallazgos quedaron anotados en los Issues que los van a resolver. D-169, en los dos repos: el *check* `real-hours` y la línea de la plantilla se quedan, pero el *check* no es obligatorio, no se crea el campo del tablero y no se completan las horas de M1; `PLAN-ENTREGA.md`, `ESTRATEGIA-PRUEBAS.md` y `README.md` al día |
+| Modificaciones del equipo | El usuario pidió solo anotar D-167 y D-168, sin decidir todavía, y eligió no hacer las tareas a mano de D-128 entre tres alcances (solo el arreglo del reporte, las tareas a mano o todo D-128) |
+| Lecciones | Correr solo los scripts del CI no reemplaza a los revisores: desde ahora, los dos revisores corren antes de abrir cada PR |
+
 ## 4. Evaluación crítica
 
 ### 4.1 Porcentaje aproximado de asistencia
