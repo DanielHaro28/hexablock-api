@@ -47,5 +47,6 @@ Esta skill **solo cambia `AI_USAGE.md`**: es el registro de lo que se hizo, no u
 1. Corre `python3 -I ../hexablock-app/tools/docs-check/check_ids.py ../hexablock-app .` y `check_tables.py` con los mismos argumentos. Si falla por un ID de otra rama, reescribe esa parte sin el ID.
 2. Busca los `⚠️ completar` que queden en el archivo (`grep -n "⚠️" AI_USAGE.md`) y muéstrale al usuario los de sus entradas: hay que completarlos antes de la entrega.
 3. Commit en cada repo donde agregaste la entrada: `docs(ai-usage): add IA-<n>`.
+4. Recuérdale al usuario que el PR necesita la línea `- Real hours: <n>` con sus horas reales (D-128): el número lo da la persona, nunca la IA.
 
 Las pruebas de esta skill (casos de `skill-creator`) están en `hexablock-app/.claude/skills/ai-usage/evals/`: las dos versiones solo cambian en las rutas y en `— solo API`.
