@@ -8,7 +8,7 @@
 > - Si un documento citado en *Dónde quedó* no está en este repo, está en `hexablock-app`.
 > - Una decisión cerrada solo se reabre si el equipo lo decide explícitamente. Los IDs nunca se reutilizan.
 >
-> **Última actualización:** 2026-11-25
+> **Última actualización:** 2026-11-26 (D-121, D-122 y D-150 cerradas en la revisión de los pendientes) · 2026-11-25
 
 ---
 
@@ -149,6 +149,14 @@
 | D-120 | **Sistema operativo: Ubuntu Server 24.04 LTS** (x86_64), no la 26.04 que la consola ofrece por defecto. Lleva más tiempo probada con Docker y Caddy, tiene soporte estándar hasta 2029 y trae `unattended-upgrades` (SEC-WEB-01). `Prompt=never` en `/etc/update-manager/release-upgrades`, para que nadie la pase a 26.04 por error | W-03, W-04; `docs/ops/DEPLOY.md` (W-05) | API | 23-11 |
 
 Las decisiones que solo afectan a la app (reglas internas de las variantes, paquetes de la app, partida guardada y motor genérico: D-07 a D-09, D-11, D-13 a D-17, D-21, D-29 a D-35, D-37, D-68 y las `ARQ-A-*`) están en `hexablock-app/docs/DECISIONES.md`.
+
+### Revisión de los pendientes (26-11)
+
+| ID | Decisión | Dónde quedó | Repos | Fecha |
+|---|---|---|---|---|
+| D-121 | **La clave del CI solo despliega (opción B).** La clave `hexablock-deploy` (D-118) entra como un usuario `deploy` propio, y en su `authorized_keys` lleva `restrict,command="/opt/hexablock/deploy.sh"`: `restrict` corta los túneles (con uno se llegaba a Postgres dentro de la máquina), el reenvío del agente y la terminal, y `command=` obliga a ejecutar siempre el script. El script se versiona en `ops/deploy.sh` de la API, se instala como `root:root 0755`, valida la etiqueta que manda el CI (`^sha-[0-9a-f]{40}$`) antes de usarla, imprime su `sha256sum` y solo baja y levanta la imagen de GHCR. `deploy` no está en el grupo `docker`, que equivale a root: solo puede correr el script con `sudo` (`/etc/sudoers.d/hexablock-deploy`). Una clave filtrada solo sirve para volver a desplegar una imagen ya publicada; volver a una versión anterior es un `workflow_dispatch` con su SHA. La administración sigue por EC2 Instance Connect, que no pasa por `authorized_keys`. Se descartaron A (la misma restricción sobre `ubuntu`, que tiene `sudo` sin contraseña: un error del script daría todo el servidor), C (dejarla sin restringir) y D (desplegar por *pull*, sin SSH: cambia el criterio de TEC-10 y D-118) | `ops/deploy.sh`, `deploy.yml` y `docs/ops/DEPLOY.md` (TEC-10, W-05); SECURITY SEC-WEB-01 | Ambos | 26-11 |
+| D-122 | **El CI verifica la huella del servidor (opción A).** La variable `EC2_KNOWN_HOSTS` del Environment `production` (no es secreta: la clave del servidor es pública) guarda la línea `hexablock.duckdns.org ssh-ed25519 …`, sacada sin pasar por la red: por EC2 Instance Connect (`/etc/ssh/ssh_host_ed25519_key.pub`) o del registro del sistema de la consola. El CI la escribe como `known_hosts` y conecta con `StrictHostKeyChecking=yes` y `HostKeyAlgorithms=ssh-ed25519`. Sobre el riesgo: en SSH la clave privada nunca viaja al servidor (RFC 4252 §7), así que un servidor falso no se la lleva; lo que evita la verificación es que el CI hable con un impostor (por ejemplo, si alguien toma el registro de DuckDNS), le mande lo que viaje por la sesión y dé por hecho un despliegue que no ocurrió. Si se recrea la instancia, se actualiza la variable (`DEPLOY.md`). Se descartaron `ssh-keyscan` en cada corrida (acepta lo que responda el nombre en ese momento), `StrictHostKeyChecking=no` o `accept-new` (en un *runner* nuevo es lo mismo) y los certificados de servidor (la clave de la CA sería un secreto más) | `deploy.yml` y `docs/ops/DEPLOY.md` (TEC-10, W-05); SECURITY SEC-WEB-03 | Ambos | 26-11 |
+| D-150 | **El audio usa `audioplayers` (opción A).** Va detrás de `AudioFacade` (ARQ-A-07): los efectos superpuestos con `AudioPool` y el modo de baja latencia de Android, la música con `ReleaseMode.loop`, los efectos precargados y el foco de audio configurado para no cortar la música de otra app. Verificado en pub.dev el 26-11 (SEC-AGT-04): versión 6.8.1, de blue-fire.xyz, unas 1,89 M descargas, licencia MIT; es la base del audio de Flame. Se descartaron `just_audio` (0.10.6: necesita un reproductor por cada efecto superpuesto) y usar los dos paquetes | ADR-001 §2.1; ARQ-01 §4.4; ARQ-03 §9; NAV-02 | Ambos | 26-11 |
 
 ## 2. Respuestas del profesor y del enunciado
 
