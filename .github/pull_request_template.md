@@ -19,6 +19,11 @@
 - [ ] `AI_USAGE.md` updated if AI was used in this PR.
 - [ ] If AI wrote code or tests in this PR, a team member reviewed and adjusted the tests, and `AI_USAGE.md` says what changed (D-59).
 
+## Real hours
+
+<!-- Hours you spent on this PR, counting the AI session and the test review (D-128). A number such as 3.5: the pr-body check fails without it. You can edit it later; the check runs again. -->
+- Real hours:
+
 ## Sensitive changes
 
 - [ ] This PR changes agent, CI or deploy configuration (`CLAUDE.md`, `.claude/`, `.github/workflows/`, `deploy/`) or security docs → I told the team.
